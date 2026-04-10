@@ -1,0 +1,107 @@
+<?xml version="1.0"?>
+<level>
+	<levelstats>
+		<height>800</height>
+		<width>1024000</width>
+		<background></background>
+		<format>2dPlatformer</format>
+	</levelstats>
+	<object type="SkeletonTwo">
+		<name>mike</name>
+		<xpos>100</xpos>
+		<ypos>100</ypos>
+		<zpos>0</zpos>
+		<scale>150</scale>
+		<preferdAction>
+			<action type="Wonder"></action>
+		</preferdAction>
+		<actionStack>
+			<action type="repeat" times="200">
+				<action type="repeat" times="10">
+					<action type="GoInAStrightLineFor">
+						<distance>random*550</distance>
+					</action>
+					<action type="DrawArcFasterVersion1"></action>
+				</action>
+				<action type="repeat" times="10">
+					<action type="GoInAStrightLineFor">
+						<distance>random*550</distance>
+					</action>
+					<action type="DrawArcFasterVersion1"></action>
+				</action>
+			</action>
+		</actionStack>
+		<sprite>res/zombie_n_skeleton2.png</sprite>
+	</object>
+	<object type="ZombieBaby">
+		<name>gnarlyTree</name>
+		<xpos>400</xpos>
+		<ypos>250</ypos>
+		<zpos>0</zpos>
+		<scale>300</scale>
+		<preferdAction>
+			<action type="Wonder"></action>
+		</preferdAction>
+		<actionStack>
+		<action type="DrawArcFasterVersion1"></action>
+			</actionStack>
+		<sprite>res/zombie_n_skeleton2.png</sprite>
+	</object>
+	<object type="ground_stone">
+		<name>ground1</name>
+		<xpos>0</xpos>
+		<ypos>200</ypos>
+		<zpos>0</zpos>
+		<scale>100</scale>
+		<width>14400</width>
+	<height>1200</height>
+		<sprite>res/2015-02-26 Tileset.png</sprite>
+	</object>
+	<object type="platform_dirt">
+		<name>platform1</name>
+		<xpos>600</xpos>
+		<ypos>0</ypos>
+		<zpos>0</zpos>
+		<scale>100</scale>
+		<width>256</width>
+		<sprite>res/2015-02-26 Tileset.png</sprite>
+		<preferdAction>
+			<action type="Wonder"></action>
+		</preferdAction>
+		<actionStack>
+			<action type="repeat" times="200">
+				<action type="repeat" times="10">
+					<action type="GoInAStrightLineFor">
+						<distance>random*550</distance>
+					</action>
+					<action type ="wonder"></action>
+				</action>
+				<action type="repeat" times="10">
+					<action type="GoInAStrightLineFor">
+						<distance>random*550</distance>
+					</action>
+				</action>
+			</action>
+		</actionStack>
+	</object>
+	
+	
+		<event type = "story">
+			<name>theStart</name>
+			<x>0</x>
+			<y>250</y>
+		</event>		
+		<event type = "story">
+			<name>theMid</name>
+			<x>512</x>
+			<y>250</y>
+		</event>
+		<event type = "LevelEnd">
+			<name>thePIT</name>
+			<x>1024</x>
+			<y>250</y>
+		</event>
+	
+	
+	
+</level>

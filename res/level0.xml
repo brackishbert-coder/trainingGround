@@ -1,0 +1,175 @@
+<?xml version="1.0"?>
+<level>
+  <levelstats>
+    <name>Level 1</name>
+    <description></description>
+    <width>12400</width>
+    <height>1024</height>
+  </levelstats>
+
+  <object type="ground_dirt" layer="Main">
+    <xpos>256</xpos>
+    <ypos>48</ypos>
+    <zpos>0</zpos>
+    <width>352</width>
+    <height>16</height>
+    <scale>100</scale>
+    <rotation>0</rotation>
+    <sprite>/home/wes/gitworkspace/trainingGround/res/2015-02-26 Tileset.png</sprite>
+    <name>too</name>
+  </object>
+  <object type="ground_dirt" layer="Main">
+    <xpos>272</xpos>
+    <ypos>64</ypos>
+    <zpos>0</zpos>
+    <width>16</width>
+    <height>16</height>
+    <scale>100</scale>
+    <rotation>0</rotation>
+    <sprite>/home/wes/gitworkspace/trainingGround/res/2015-02-26 Tileset.png</sprite>
+    <name>too</name>
+  </object>
+  <object type="ground_dirt" layer="Main">
+    <xpos>576</xpos>
+    <ypos>64</ypos>
+    <zpos>0</zpos>
+    <width>16</width>
+    <height>16</height>
+    <scale>100</scale>
+    <rotation>0</rotation>
+    <sprite>/home/wes/gitworkspace/trainingGround/res/2015-02-26 Tileset.png</sprite>
+    <name>too</name>
+  </object>
+  <object type="ground_dirt" layer="Main">
+    <xpos>288</xpos>
+    <ypos>80</ypos>
+    <zpos>0</zpos>
+    <width>16</width>
+    <height>16</height>
+    <scale>100</scale>
+    <rotation>0</rotation>
+    <sprite>/home/wes/gitworkspace/trainingGround/res/2015-02-26 Tileset.png</sprite>
+    <name>too</name>
+  </object>
+  <object type="ground_dirt" layer="Main">
+    <xpos>560</xpos>
+    <ypos>80</ypos>
+    <zpos>0</zpos>
+    <width>16</width>
+    <height>16</height>
+    <scale>100</scale>
+    <rotation>0</rotation>
+    <sprite>/home/wes/gitworkspace/trainingGround/res/2015-02-26 Tileset.png</sprite>
+    <name>too</name>
+  </object>
+  <object type="ground_dirt" layer="Main">
+    <xpos>304</xpos>
+    <ypos>96</ypos>
+    <zpos>0</zpos>
+    <width>16</width>
+    <height>16</height>
+    <scale>100</scale>
+    <rotation>0</rotation>
+    <sprite>/home/wes/gitworkspace/trainingGround/res/2015-02-26 Tileset.png</sprite>
+    <name>too</name>
+  </object>
+  <object type="ground_dirt" layer="Main">
+    <xpos>544</xpos>
+    <ypos>96</ypos>
+    <zpos>0</zpos>
+    <width>16</width>
+    <height>16</height>
+    <scale>100</scale>
+    <rotation>0</rotation>
+    <sprite>/home/wes/gitworkspace/trainingGround/res/2015-02-26 Tileset.png</sprite>
+    <name>too</name>
+  </object>
+  <object type="ground_dirt" layer="Main">
+    <xpos>320</xpos>
+    <ypos>112</ypos>
+    <zpos>0</zpos>
+    <width>16</width>
+    <height>16</height>
+    <scale>100</scale>
+    <rotation>0</rotation>
+    <sprite>/home/wes/gitworkspace/trainingGround/res/2015-02-26 Tileset.png</sprite>
+    <name>too</name>
+  </object>
+  <object type="ground_dirt" layer="Main">
+    <xpos>528</xpos>
+    <ypos>112</ypos>
+    <zpos>0</zpos>
+    <width>16</width>
+    <height>16</height>
+    <scale>100</scale>
+    <rotation>0</rotation>
+    <sprite>/home/wes/gitworkspace/trainingGround/res/2015-02-26 Tileset.png</sprite>
+    <name>too</name>
+  </object>
+  <object type="ground_dirt" layer="Main">
+    <xpos>336</xpos>
+    <ypos>128</ypos>
+    <zpos>0</zpos>
+    <width>16</width>
+    <height>16</height>
+    <scale>100</scale>
+    <rotation>0</rotation>
+    <sprite>/home/wes/gitworkspace/trainingGround/res/2015-02-26 Tileset.png</sprite>
+    <name>too</name>
+  </object>
+  <object type="ground_dirt" layer="Main">
+    <xpos>512</xpos>
+    <ypos>128</ypos>
+    <zpos>0</zpos>
+    <width>16</width>
+    <height>16</height>
+    <scale>100</scale>
+    <rotation>0</rotation>
+    <sprite>/home/wes/gitworkspace/trainingGround/res/2015-02-26 Tileset.png</sprite>
+    <name>too</name>
+  </object>
+  <object type="ground_dirt" layer="Main">
+    <xpos>352</xpos>
+    <ypos>144</ypos>
+    <zpos>0</zpos>
+    <width>16</width>
+    <height>16</height>
+    <scale>100</scale>
+    <rotation>0</rotation>
+    <sprite>/home/wes/gitworkspace/trainingGround/res/2015-02-26 Tileset.png</sprite>
+    <name>too</name>
+  </object>
+  <object type="ground_dirt" layer="Main">
+    <xpos>496</xpos>
+    <ypos>144</ypos>
+    <zpos>0</zpos>
+    <width>16</width>
+    <height>16</height>
+    <scale>100</scale>
+    <rotation>0</rotation>
+    <sprite>/home/wes/gitworkspace/trainingGround/res/2015-02-26 Tileset.png</sprite>
+    <name>too</name>
+  </object>
+  <object type="ground_dirt" layer="Main">
+    <xpos>368</xpos>
+    <ypos>160</ypos>
+    <zpos>0</zpos>
+    <width>128</width>
+    <height>32</height>
+    <scale>100</scale>
+    <rotation>0</rotation>
+    <sprite>/home/wes/gitworkspace/trainingGround/res/2015-02-26 Tileset.png</sprite>
+    <name>too</name>
+  </object>
+  <object type="ground_dirt" layer="Main">
+    <xpos>416</xpos>
+    <ypos>192</ypos>
+    <zpos>0</zpos>
+    <width>32</width>
+    <height>400</height>
+    <scale>100</scale>
+    <rotation>0</rotation>
+    <sprite>/home/wes/gitworkspace/trainingGround/res/2015-02-26 Tileset.png</sprite>
+    <name>too</name>
+  </object>
+</level>

@@ -1,0 +1,16 @@
+	<object type="platform_dirt">
+        <name>platform1</name>
+        <xpos>400</xpos>
+        <ypos>200</ypos>
+        <scale>100</scale>
+        <width>256</width>
+        <sprite>res/2015-02-26 Tileset.png</sprite>
+    </object>
+    	<object type="platform_dirt">
+        <name>platform1</name>
+        <xpos>400</xpos>
+        <ypos>200</ypos>
+        <scale>100</scale>
+        <width>256</width>
+        <sprite>res/2015-02-26 Tileset.png</sprite>
+    </object>

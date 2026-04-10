@@ -1,0 +1,103 @@
+	<object type="ground_stone">
+		<name>ground1</name>
+		<xpos>0</xpos>
+		<ypos>300</ypos>
+		<scale>100</scale>
+		<width>1024</width>
+		<sprite>res/2015-02-26 Tileset.png</sprite>
+	</object>
+<object type="platform_dirt">
+		<name>platform1</name>
+		<xpos>50</xpos>
+		<ypos>200</ypos>
+		<scale>100</scale>
+		<width>25</width>
+		<sprite>res/2015-02-26 Tileset.png</sprite>
+		<preferdAction>
+			
+		</preferdAction>
+		<actionStack>
+			
+		</actionStack>
+	</object>
+		<object type="ground_stone">
+		<name>ground1</name>
+		<xpos>-1024</xpos>
+		<ypos>300</ypos>
+		<scale>100</scale>
+		<width>2048</width>
+		<sprite>res/2015-02-26 Tileset.png</sprite>
+	</object>
+<object type="ZombieBaby">
+		<name>gnarlyTree</name>
+		<xpos>220</xpos>
+		<ypos>0</ypos>
+		<scale>100</scale>
+		<preferdAction>
+			
+		</preferdAction>
+		<actionStack>
+
+		</actionStack>
+		<sprite>res/zombie_n_skeleton2.png</sprite>
+	</object>
+	<object type="platform_dirt">
+		<name>platform2</name>
+		<xpos>100</xpos>
+		<ypos>200</ypos>
+		<scale>100</scale>
+		<width>50</width>
+		<sprite>res/2015-02-26 Tileset.png</sprite>
+		<preferdAction>
+			
+		</preferdAction>
+		<actionStack>
+			
+		</actionStack>
+	</object>
+<object type="platform_dirt">
+		<name>platform3</name>
+		<xpos>200</xpos>
+		<ypos>200</ypos>
+		<scale>100</scale>
+		<width>75</width>
+		<sprite>res/2015-02-26 Tileset.png</sprite>
+		<preferdAction>
+			
+		</preferdAction>
+		<actionStack>
+			
+		</actionStack>
+	</object>
+
+<object type="platform_dirt">
+		<name>platform3_1</name>
+		<xpos>400</xpos>
+		<ypos>200</ypos>
+		<scale>100</scale>
+		<width>100</width>
+		<sprite>res/2015-02-26 Tileset.png</sprite>
+		<preferdAction>
+			
+		</preferdAction>
+		<actionStack>
+			
+		</actionStack>
+	</object>
+
+
+<object type="platform_dirt">
+		<name>platform4</name>
+		<xpos>575</xpos>
+		<ypos>200</ypos>
+		<scale>100</scale>
+		<width>50</width>
+		<sprite>res/2015-02-26 Tileset.png</sprite>
+		<preferdAction>
+			
+		</preferdAction>
+		<actionStack>
+			
+		</actionStack>
+	</object>
+	

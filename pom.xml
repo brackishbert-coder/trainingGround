@@ -1,0 +1,49 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<groupId>FlatLand</groupId>
+	<artifactId>trainingGround</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+	<packaging>jar</packaging>
+
+	<name>trainingGround</name>
+	<url>http://maven.apache.org</url>
+
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<maven.compiler.source>21</maven.compiler.source>
+    	<maven.compiler.target>21</maven.compiler.target>
+	</properties>
+
+	<dependencies>
+
+	<dependency>
+		<groupId>ScreenIntegration</groupId>
+		<artifactId>ScreenIntegration</artifactId>
+		<version>0.0.1-SNAPSHOT</version>
+	</dependency>
+	<dependency>
+  <groupId>com.github.sarxos</groupId>
+  <artifactId>webcam-capture</artifactId>
+  <version>0.3.10</version>
+</dependency>
+	<dependency>
+    <groupId>org.bytedeco</groupId>
+    <artifactId>javacv-platform</artifactId>
+    <version>1.5.10</version>
+</dependency>
+
+	<dependency>
+		<groupId>the</groupId>
+		<artifactId>VectorServer</artifactId>
+		<version>0.0.1-SNAPSHOT</version>
+	</dependency>
+	<dependency>
+		<groupId>The</groupId>
+		<artifactId>StartAnimation</artifactId>
+		<version>0.0.1-SNAPSHOT</version>
+	</dependency>
+	</dependencies>
+</project>

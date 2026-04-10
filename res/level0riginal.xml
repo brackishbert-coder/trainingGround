@@ -1,0 +1,88 @@
+<?xml version="1.0"?>
+<level>
+	<levelstats>
+		<height>800</height>
+		<width>102400</width>
+		<background></background>
+		<format>2dPlatformer</format>
+	</levelstats>
+
+<object type="Item">
+		<name>mike</name>
+		<xpos>100</xpos>
+		<ypos>100</ypos>
+		<zpos>0</zpos>
+		<scale>150</scale>
+		<sprite>res/zombie_n_skeleton2.png</sprite>
+	</object>
+	<object type="ground_stone">
+		<name>ground1</name>
+		<xpos>0</xpos>
+		<ypos>300</ypos>
+		<zpos>0</zpos>
+		<scale>100</scale>
+		<width>1024</width>
+		<height>1000</height>
+		<sprite>res/2015-02-26 Tileset.png</sprite>
+	</object>
+	<object type="ground_stone">
+		<name>base0</name>
+		<xpos>102000</xpos>
+		<ypos>300</ypos>
+		<zpos>0</zpos>
+		<scale>100</scale>
+		<width>1024</width>
+		<height>1000</height>
+		<sprite>res/2015-02-26 Tileset.png</sprite>
+	</object>
+
+
+	<object type="platform_dirt">
+		<name>platform1</name>
+		<xpos>0</xpos>
+		<ypos>-200</ypos>
+		<zpos>0</zpos>
+		<scale>100</scale>
+		<width>256</width>
+		<sprite>res/2015-02-26 Tileset.png</sprite>
+		<preferdAction></preferdAction>
+		<actionStack></actionStack>
+	</object>
+	<object type="platform_dirt">
+		<name>platform2</name>
+		<xpos>300</xpos>
+		<ypos>-200</ypos>
+		<zpos>0</zpos>
+		<scale>100</scale>
+		<width>256</width>
+		<sprite>res/2015-02-26 Tileset.png</sprite>
+		<preferdAction>
+			<action type="movebetween">
+				<x>1</x>
+				<y>1</y>
+				<xlow>300</xlow>
+				<xhigh>600</xhigh>
+				<ylow>200</ylow>
+				<yhigh>250</yhigh>
+				<angle>30</angle>
+			</action>
+		</preferdAction>
+		<actionStack></actionStack>
+	</object>
+	
+		<event type = "story">
+			<name>theStart</name>
+			<x>0</x>
+			<y>250</y>
+		</event>		
+		<event type = "story">
+			<name>theMid</name>
+			<x>512</x>
+			<y>250</y>
+		</event>
+		<event type = "LevelEnd">
+			<name>thePIT</name>
+			<x>1024</x>
+			<y>250</y>
+		</event>
+</level>
