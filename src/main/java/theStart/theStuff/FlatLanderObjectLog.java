@@ -3,7 +3,6 @@ package theStart.theStuff;
 import java.util.ArrayList;
 
 import theStart.thePeople.FlatLander;
-import theStart.thePeople.FlatLanderFaceBook;
 
 public class FlatLanderObjectLog {
 

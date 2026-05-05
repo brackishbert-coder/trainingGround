@@ -1,7 +1,5 @@
 package theStart.theView.TheControls;
 
-import java.awt.BufferCapabilities;
-import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Image;
@@ -14,9 +12,8 @@ import flatLand.trainingGround.FlatLandSelector;
 import flatLand.trainingGround.GAMSTATUS;
 import flatLand.trainingGround.GameStatus;
 import flatLand.trainingGround.theStudio.Camera;
+
 import src.Simulation;
-import theStart.thePeople.FlatLanderFaceBook;
-import theStart.theView.WebcamUpdater;
 
 
 

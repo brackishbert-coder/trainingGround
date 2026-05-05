@@ -1,6 +1,5 @@
 package flatLand.trainingGround;
 
-import FlatLandStructure.ViewableFlatLand;
 import java.util.ArrayList;
 
 public class EventHandler {

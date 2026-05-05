@@ -1,6 +1,5 @@
 package FlatLandStructure;
 
-import java.awt.Color;
 import java.lang.reflect.Array;
 import FlatLander.FlatLander;
 

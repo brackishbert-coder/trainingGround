@@ -7,8 +7,6 @@ import javax.swing.KeyStroke;
 
 import Player.PlayerState;
 import theStart.theView.TheControls.GameScreen;
-import flatLand.trainingGround.Sprites.Sprites;
-import flatLand.trainingGround.Sprites.TerminalSprite;
 import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
@@ -311,11 +309,20 @@ public class PlayerKeybordHandler {
 
 		ChangeModeAction(XMLLEVELLOADER.PlayerWrper play, XMLLEVELLOADER.FlatLanderWrper terminal) {
 
-			this.terminal = terminal;
+			this.setTerminal(terminal);
 		}
 
 		public void actionPerformed(ActionEvent e) {
 			gameMode = !gameMode;
+		}
+
+		@SuppressWarnings("unused")
+		public XMLLEVELLOADER.FlatLanderWrper getTerminal() {
+			return terminal;
+		}
+
+		public void setTerminal(XMLLEVELLOADER.FlatLanderWrper terminal) {
+			this.terminal = terminal;
 		}
 	}
 
@@ -327,6 +334,7 @@ public class PlayerKeybordHandler {
 		private static final long serialVersionUID = 1L;
 		private XMLLEVELLOADER.FlatLanderWrper terminal;
 
+		@SuppressWarnings("unused")
 		public XMLLEVELLOADER.FlatLanderWrper getTerminal() {
 			return terminal;
 		}
@@ -402,7 +410,7 @@ public class PlayerKeybordHandler {
 		MoveAction(int xDirection, int yDirection, XMLLEVELLOADER.PlayerWrper player) {
 
 			this.xDirection = xDirection;
-			this.yDirection = yDirection;
+			this.setyDirection(yDirection);
 			this.player = player;
 		}
 
@@ -416,6 +424,15 @@ public class PlayerKeybordHandler {
 			
 				player.getSprite().updateState();
 			}
+		}
+
+		@SuppressWarnings("unused")
+		public int getyDirection() {
+			return yDirection;
+		}
+
+		public void setyDirection(int yDirection) {
+			this.yDirection = yDirection;
 		}
 	}
 
@@ -470,6 +487,7 @@ public class PlayerKeybordHandler {
 
 	}
 
+	@SuppressWarnings("unused")
 	private class FallAction extends AbstractAction {
 
 		/**
@@ -479,6 +497,7 @@ public class PlayerKeybordHandler {
 		XMLLEVELLOADER.PlayerWrper player;
 		private int yDirection = -1;
 
+		@SuppressWarnings("unused")
 		FallAction(XMLLEVELLOADER.PlayerWrper player) {
 
 			this.player = player;
@@ -491,6 +510,14 @@ public class PlayerKeybordHandler {
 
 				}
 			}
+		}
+
+		public int getyDirection() {
+			return yDirection;
+		}
+
+		public void setyDirection(int yDirection) {
+			this.yDirection = yDirection;
 		}
 
 	}

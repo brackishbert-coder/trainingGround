@@ -2,8 +2,6 @@ package flatLand.trainingGround;
 
 import java.util.ArrayList;
 
-import FlatLander.FlatLander;
-
 public class GameStatus {
 
 	

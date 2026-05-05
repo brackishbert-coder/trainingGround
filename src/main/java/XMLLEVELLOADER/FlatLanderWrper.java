@@ -1,7 +1,6 @@
 package XMLLEVELLOADER;
 
 import java.awt.Color;
-import java.awt.Rectangle;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
@@ -12,7 +11,6 @@ import javax.swing.JPanel;
 import Actions.ActionStack;
 import Actions.ActionsInterface;
 import Actions.NoAction;
-import Box.Box.Box;
 import Box.Box.PromptObserver;
 import Box.GameSpaceInterpreter.SandBox;
 import Constructs.Point;
@@ -123,12 +121,14 @@ public class FlatLanderWrper extends FlatLander implements Terminal ,Collidable{
 		return currentflatLanderBB;
 	}
 
+	@SuppressWarnings("unused")
 	private BoundingBox getPreviousBoundingBox() {
 
 		return this.previousflatLanderBB;
 	}
 
 
+	@SuppressWarnings("unused")
 	public int passesThroughSide(FlatLander flatLanderToCheckForCollisions) {
 		int predictedX = flatLanderToCheckForCollisions.getX();
 		int predictedY = flatLanderToCheckForCollisions.getY();
@@ -222,7 +222,8 @@ public class FlatLanderWrper extends FlatLander implements Terminal ,Collidable{
 		System.setOut(ps);
 		
 
-		box = new SandBox(baos, FlatLanderFaceBook.getInstance().getFlatlanderFaceBook(),
+		FlatLanderFaceBook.getInstance();
+		box = new SandBox(baos, FlatLanderFaceBook.getFlatlanderFaceBook(),
 				FlatLanderFaceBook.getInstance(),flatLand2, events);
 		TerminalSprite sprite2 = new TerminalSprite(terminalPath, 24, 6,200);
 		PromptObserver promptOb = new PromptObserver(sprite2);

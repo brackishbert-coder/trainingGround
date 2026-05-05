@@ -28,9 +28,7 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import FlatLandStructure.ViewableFlatLand;
-//import Math.GameDice;
 import testing.VariableRepository;
-import theStart.theView.TheControls.GameScreen;
 
 public class FlatLandWindow extends JFrame {
 

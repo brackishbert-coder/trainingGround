@@ -4,29 +4,22 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.image.BufferStrategy;
 import java.awt.image.BufferedImage;
-import java.io.ByteArrayOutputStream;
-import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Set;
 
 import Box.Box.PromptObserver;
-import Box.GameSpaceInterpreter.SandBox;
 import Drawing.ImagePile;
 import Drawing.ImageStackEntry;
-import FlatLand.Physics.TypeOfEntity;
 import FlatLandStructure.ViewableFlatLand;
 import FlatLander.BoundingBox;
 import FlatLander.FlatLandFacebook;
 import FlatLander.FlatLander;
 import XMLLEVELLOADER.FlatLanderWrper;
-import dialogManagement.DialogManager;
 import flatLand.trainingGround.EventHandler;
 import flatLand.trainingGround.GAMSTATUS;
 import flatLand.trainingGround.GameStatus;
-import flatLand.trainingGround.Sprites.ObserverPrompt;
 import flatLand.trainingGround.Sprites.TerminalSprite;
-import theStart.thePeople.FlatLanderFaceBook;
 
 public class Camera {
 	private ViewableFlatLand flatland;

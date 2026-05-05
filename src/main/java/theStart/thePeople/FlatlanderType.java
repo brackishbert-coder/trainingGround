@@ -1,7 +1,5 @@
 package theStart.thePeople;
 
-import theStart.theStuff.ClassOfFlatLander;
-
 public enum FlatlanderType {
 	OneToOne, OneToMany, ManyToOne, ManyToMany;
 

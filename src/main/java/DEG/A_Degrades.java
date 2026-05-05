@@ -4,7 +4,6 @@ import java.awt.Color;
 
 import Constructs.Construct;
 import Constructs.Point;
-import DEG.Degrades;
 import FlatLand.Physics.TypeOfEntity;
 import FlatLander.BoundingBox;
 import FlatLander.FlatLander;

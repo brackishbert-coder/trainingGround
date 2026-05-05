@@ -2,8 +2,6 @@ package XMLLEVELLOADER;
 
 import java.awt.Color;
 import java.util.ArrayList;
-import java.util.Hashtable;
-
 import javax.swing.JPanel;
 
 import Actions.ActionStack;
@@ -14,7 +12,6 @@ import FlatLand.Physics.TypeOfEntity;
 import FlatLander.BoundingBox;
 import FlatLander.FlatLander;
 import flatLand.trainingGround.Sprites.Sprites;
-import flatLand.trainingGround.Sprites.TerminalSprite;
 
 public class TERMINAL extends FlatLander implements Terminal {
 
@@ -81,6 +78,7 @@ public class TERMINAL extends FlatLander implements Terminal {
 		
 		return this.getCurrentflatLanderBB();
 	}
+	@SuppressWarnings("unused")
 	private BoundingBox getPreviousBoundingBox() {
 		
 		return this.previousflatLanderBB;
@@ -133,6 +131,7 @@ public class TERMINAL extends FlatLander implements Terminal {
 
 
 
+	@SuppressWarnings("unused")
 	public int passesThroughSide(FlatLander flatLanderToCheckForCollisions) {
 		int predictedX = flatLanderToCheckForCollisions.getX();
 		int predictedY = flatLanderToCheckForCollisions.getY();

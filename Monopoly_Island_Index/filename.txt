@@ -1,0 +1,20 @@
+slide1: 0
+slide2: 0
+slide3: 0
+slide4: 0
+slide5: 0
+slide6: 0
+slide7: 0
+slide8: 0
+jCheckBox: 0
+jCheckBox1: 0
+jCheckBox2: 0
+jCheckBox3: 0
+jCheckBox4: 0
+jCheckBox5: 0
+jCheckBox6: 0
+jCheckBox7: 0
+jTextField: 
+jTextField1: 
+jTextField2: 
+jTextField3: 

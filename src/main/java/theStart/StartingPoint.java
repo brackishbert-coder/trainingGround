@@ -8,7 +8,6 @@ import FlatLander.FlatLandFacebook;
 import Notes.Notes;
 import View.FlatLandWindow;
 
-import XMLLEVELLOADER.FlatLanderWrper;
 import XMLLEVELLOADER.PlayerWrper;
 import XMLLEVELLOADER.XmlLevelLoader;
 import flatLand.trainingGround.EventHandler;

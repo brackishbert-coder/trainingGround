@@ -13,6 +13,7 @@ import FlatLander.FlatLander;
 public class DrawArcFasterVersion1 extends Actions {
 
 	private ActionStatus actionStatus;
+	@SuppressWarnings("unused")
 	private ViewableFlatLand universe;
 	private static int originalX = 0;
 	private static int originalY = 0;
@@ -41,6 +42,7 @@ public class DrawArcFasterVersion1 extends Actions {
 		originalY = actor.getY();
 
 		Point point1 = new Point(originalX, originalY);
+		@SuppressWarnings("unused")
 		Point point2 = new Point(originalX + 10, originalY + 10);
 
 		int distance = 75;
@@ -52,6 +54,7 @@ public class DrawArcFasterVersion1 extends Actions {
 		flatLandImageY = originalY;
 		img = new BufferedImage(widthOfImg, heightOfImg, BufferedImage.TYPE_INT_ARGB);
 
+		@SuppressWarnings("unused")
 		double degreeOriginal = radiansToDegrees(actor.direction);
 		int height = 75;
 
@@ -116,10 +119,12 @@ public class DrawArcFasterVersion1 extends Actions {
 		return nonLocal - originalY;
 	}
 
+	@SuppressWarnings("unused")
 	private int getflatLandImageY(int Y) {
 		return Y - localActorOriginalY;
 	}
 
+	@SuppressWarnings("unused")
 	private int getflatLAndImageX(int X) {
 		return X - localActorOriginalX;
 	}

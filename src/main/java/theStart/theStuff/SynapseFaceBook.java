@@ -2,8 +2,6 @@ package theStart.theStuff;
 
 import java.util.ArrayList;
 
-import theStart.thePeople.FlatLander.XYPair;
-
 public class SynapseFaceBook {
 
 	private static SynapseFaceBook instance;

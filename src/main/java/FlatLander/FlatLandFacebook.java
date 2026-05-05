@@ -2,8 +2,6 @@ package FlatLander;
 
 import java.util.ArrayList;
 
-import FlatLander.FlatLander;
-
 public class FlatLandFacebook {
 
 	

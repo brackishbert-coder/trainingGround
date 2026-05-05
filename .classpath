@@ -45,13 +45,6 @@
 			<attribute name="m2e-apt" value="true"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="src" path="/VectorServer"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/CameraServer"/>
-	<classpathentry kind="src" path="/SOM"/>
-	<classpathentry kind="src" path="/Monopoly_Island_Index"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/PBC2"/>
-	<classpathentry kind="src" path="/AntAnimation"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/LOGGING"/>
 	<classpathentry kind="src" output="target/test-classes" path="target/generated-test-sources/test-annotations">
 		<attributes>
 			<attribute name="ignore_optional_problems" value="true"/>
@@ -61,6 +54,6 @@
 			<attribute name="m2e-apt" value="true"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="src" path="/StartAnimation"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/BoardTemplate"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>

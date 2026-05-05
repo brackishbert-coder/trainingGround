@@ -1,15 +1,7 @@
 package environment;
 
-import java.awt.Color;
-
-import Constructs.Construct;
-import Constructs.Point;
 import FlatLand.Physics.Physics;
-import FlatLand.Physics.TypeOfEntity;
 import FlatLandStructure.ViewableFlatLand;
-import FlatLander.BoundingBox;
-import FlatLander.FlatLander;
-import FlatLander.FlatLanderClassification;
 import dialogManagement.DialogManager;
 import flatLand.trainingGround.EventHandler;
 import flatLand.trainingGround.theStudio.Camera;

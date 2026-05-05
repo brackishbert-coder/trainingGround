@@ -2,10 +2,6 @@ package Player;
 
 import java.awt.Color;
 
-import javax.swing.JFrame;
-import javax.swing.JPanel;
-
-import Constructs.Point;
 import FlatLand.Physics.TypeOfEntity;
 import FlatLander.BoundingBox;
 import FlatLander.FlatLander;

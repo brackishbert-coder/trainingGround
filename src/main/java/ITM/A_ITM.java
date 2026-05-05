@@ -2,15 +2,10 @@ package ITM;
 
 import java.awt.Color;
 
-import Constructs.Construct;
-import Constructs.Point;
 import DEG.DegradesToken;
 import DES.DestructionToken;
 import FlatLand.Physics.TypeOfEntity;
-import FlatLander.BoundingBox;
 import FlatLander.FlatLander;
-import FlatLander.FlatLanderClassification;
-import PER.Perminant;
 import PER.PerminantToken;
 import PRG.ProgToken;
 import SP_SUD.SpontaniousDestruToken;

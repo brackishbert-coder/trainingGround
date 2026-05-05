@@ -4,10 +4,8 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.io.PrintStream;
 
-import Box.Box.Box;
 import Box.Box.PromptObserver;
 import Box.GameSpaceInterpreter.SandBox;
 import Constructs.Point;
@@ -65,6 +63,7 @@ public class ItemWraper extends A_ITM implements Collidable{
 		return this.getCurrentflatLanderBB();
 	}
 	
+	@SuppressWarnings("unused")
 	private BoundingBox getPreviousBoundingBox() {
 
 		return this.previousflatLanderBB;
@@ -128,6 +127,7 @@ public class ItemWraper extends A_ITM implements Collidable{
 		}
 	}
 
+	@SuppressWarnings("unused")
 	public int passesThroughSide(FlatLander flatLanderToCheckForCollisions) {
 		int predictedX = flatLanderToCheckForCollisions.getX();
 		int predictedY = flatLanderToCheckForCollisions.getY();

@@ -1,6 +1,5 @@
 package flatLand.trainingGround.Sprites;
 
-import Box.Box.Box;
 import Box.Box.Observer;
 import Box.GameSpaceInterpreter.SandBox;
 

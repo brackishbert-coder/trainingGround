@@ -4,8 +4,6 @@ import java.util.ArrayList;
 
 import Box.Box.PromptObserver;
 import flatLand.trainingGround.Sprites.ObserverPrompt;
-import theStart.thePeople.FlatLander;
-import theStart.thePeople.FlatLanderFaceBook;
 
 public class DialogManager {
 	private static DialogManager instance;

@@ -6,7 +6,6 @@ import java.util.List;
 import FlatLander.FlatLandFacebook;
 import FlatLander.FlatLander;
 import Logging.LOG;
-import Player.Player;
 import XMLLEVELLOADER.FlatLanderWrper;
 import XMLLEVELLOADER.PlayerWrper;
 

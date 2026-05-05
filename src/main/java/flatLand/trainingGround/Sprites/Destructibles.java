@@ -1,8 +1,6 @@
 package flatLand.trainingGround.Sprites;
 
 import java.awt.image.BufferedImage;
-import java.util.Random;
-
 import FlatLander.FlatLander;
 
 public class Destructibles implements Sprites {

@@ -4,9 +4,7 @@ import java.awt.Canvas;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.image.BufferStrategy;
-import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -15,19 +13,13 @@ import FlatLandStructure.ViewableFlatLand;
 import Nuron.NuronForDisplay;
 
 import theStart.thePeople.FlatLander;
-import theStart.thePeople.FlatLander.XYPair;
-import theStart.thePeople.FlatLander.XYWrapper;
 import theStart.thePeople.FlatLanderFaceBook;
 import theStart.thePeople.FlatlanderType;
 import theStart.theSpace.FlatLandWindow;
-import theStart.theStuff.BranchType;
 import theStart.theStuff.FlatLanderRandom;
 import theStart.theStuff.ClassOfFlatLander;
-import theStart.theStuff.SynapseFaceBook;
-import theStart.theStuff.SynapsePair;
-import theStart.theView.TheControls.KeyBoardHandler;
-import vectorization.vector;
 import vec.VectorServer;
+import vectorization.vector;
 public class TheStartCamera implements CameraContract {
 
 	private int width;

@@ -4,36 +4,20 @@ package theStart.thePeople;
 
 
 import java.awt.Color;
-import java.awt.Dimension;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
 import java.awt.image.Raster;
-import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Map;
 
-import javax.imageio.ImageIO;
-
 import org.bytedeco.javacv.Frame;
-import org.bytedeco.javacv.FrameGrabber;
 import org.bytedeco.javacv.OpenCVFrameConverter;
-import org.bytedeco.javacv.OpenCVFrameGrabber;
-import org.bytedeco.javacv.FrameGrabber.Exception;
 import org.bytedeco.javacv.Java2DFrameConverter;
-import org.bytedeco.opencv.global.opencv_imgcodecs;
 import org.bytedeco.opencv.opencv_core.IplImage;
 
 
-import CV.AdvancedFaceDetection;
 import FlatLandStructure.ViewableFlatLand;
 import Nuron.NuronForDisplay;
-import net.sourceforge.tess4j.Tesseract;
-import net.sourceforge.tess4j.TesseractException;
-import theStart.thePeople.FlatLander.XYPair;
-import theStart.thePeople.FlatLander.XYWrapper;
-import theStart.theSpace.FlatLand;
 import theStart.theStuff.BranchType;
 import theStart.theStuff.FlatLanderRandom;
 import theStart.theStuff.ClassOfFlatLander;
@@ -1092,7 +1076,6 @@ public static double computeEdgeThreshold(BufferedImage img) {
 
 			this.timeStartEnd = System.currentTimeMillis();
 			long l = this.timeStartEnd - this.timeStartBeginning;
-			l = l ;
 			frequency = this.backFireCapacity / l;
 			timeStart = false;
 		}

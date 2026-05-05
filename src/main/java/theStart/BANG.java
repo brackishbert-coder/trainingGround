@@ -7,8 +7,6 @@ import java.util.Scanner;
 
 import FlatLandStructure.ViewableFlatLand;
 import Logging.LOG;
-import theStart.theSpace.FlatLand;
-import theStart.theSpace.FlatLandDimension;
 import theStart.theSpace.FlatLandWindow;
 import theStart.theView.WebcamUpdater;
 import theStart.theView.TheControls.TheStartCamera;

@@ -7,11 +7,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
 
-import javax.swing.JPanel;
-
 import Actions.ActionStack;
 import Actions.ActionsInterface;
-import Box.Box.Box;
 import Box.Box.PromptObserver;
 import Box.GameSpaceInterpreter.SandBox;
 import Constructs.Point;
@@ -26,7 +23,6 @@ import flatLand.trainingGround.Sprites.Sprites;
 import flatLand.trainingGround.Sprites.TerminalSprite;
 import theStart.thePeople.FlatLanderFaceBook;
 import theStart.theView.TheControls.GameScreen;
-import userInput.PlayerKeybordHandler;
 import FlatLand.Physics.*;
 public class PlayerWrper extends Player implements Collidable {
 
@@ -60,7 +56,8 @@ public class PlayerWrper extends Player implements Collidable {
 		PrintStream ps = new PrintStream(baos);
 		System.setOut(ps);
 
-		box = new SandBox(baos, FlatLanderFaceBook.getInstance().getFlatlanderFaceBook(),FlatLanderFaceBook.getInstance(),flatLand2,events);
+		FlatLanderFaceBook.getInstance();
+		box = new SandBox(baos, FlatLanderFaceBook.getFlatlanderFaceBook(),FlatLanderFaceBook.getInstance(),flatLand2,events);
 		TerminalSprite sprite2 = new TerminalSprite(terminalPath, 24, 6, 200);
 		PromptObserver promptOb = new PromptObserver(sprite2);
 		ObserverPrompt obvPrompt = new ObserverPrompt(box);
@@ -138,6 +135,7 @@ public class PlayerWrper extends Player implements Collidable {
 		return this.getCurrentflatLanderBB();
 	}
 
+	@SuppressWarnings("unused")
 	private BoundingBox getPreviousBoundingBox() {
 
 		return this.previousflatLanderBB;
@@ -185,6 +183,7 @@ public class PlayerWrper extends Player implements Collidable {
 		}
 	}
 
+	@SuppressWarnings("unused")
 	public int passesThroughSide(FlatLander flatLanderToCheckForCollisions) {
 		int predictedX = flatLanderToCheckForCollisions.getX();
 		int predictedY = flatLanderToCheckForCollisions.getY();

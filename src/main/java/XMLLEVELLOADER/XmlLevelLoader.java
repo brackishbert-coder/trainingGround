@@ -34,14 +34,11 @@ import FlatLandStructure.ViewableFlatLand;
 import FlatLander.FlatLandFacebook;
 import flatLand.trainingGround.EventHandler;
 import flatLand.trainingGround.GameEvent;
-import flatLand.trainingGround.Sprites.ItemObject;
 import flatLand.trainingGround.Sprites.SceneObject;
 import flatLand.trainingGround.Sprites.Skeleton;
 import flatLand.trainingGround.Sprites.SkeletonTwo;
 import flatLand.trainingGround.Sprites.ZombieBaby;
-import slideshow.Astroid;
-import slideshow.Glizzy;
-import sprites.Ship;
+
 import theStart.theView.TheControls.GameScreen;
 
 
@@ -156,70 +153,73 @@ public class XmlLevelLoader {
 						ActionStack melsActionStack = buildTheActionStack(actionStack, mel, flatLand);
 						mel.setActionStack(melsActionStack);
 					}
-				}else  if (type.equalsIgnoreCase("ship")) {
-					String sprite = element.getElementsByTagName("sprite").item(0).getTextContent();
-					FlatLanderWrper mel = new FlatLanderWrper( xpos, ypos, zpos, name, 0,true,false, TypeOfEntity.MONSTER, Color.BLUE);
+				}
+				//else  if (type.equalsIgnoreCase("ship")) {
+				//	String sprite = element.getElementsByTagName("sprite").item(0).getTextContent();
+				//	FlatLanderWrper mel = new FlatLanderWrper( xpos, ypos, zpos, name, 0,true,false, TypeOfEntity.MONSTER, Color.BLUE);
 					
 					
-					mel.setSprite(new Ship(sprite));
-					while(!FlatLandFacebook.getInstance().requestToken(this)) {}
-					FlatLandFacebook.getInstance().add(mel,this);
-					FlatLandFacebook.getInstance().releaseToken(this);
-					Node item = element.getElementsByTagName("preferdAction").item(0);
-					Element prefAction = (Element) item;
-					if (prefAction != null) {
-						ActionsInterface prefdAction = getPreferedAction(prefAction, mel, flatLand);
-						mel.setPreferedAction(prefdAction);
-					}
-					Node stack = element.getElementsByTagName("actionStack").item(0);
-					Element actionStack = (Element) stack;
-					if (actionStack != null) {
-						ActionStack melsActionStack = buildTheActionStack(actionStack, mel, flatLand);
-						mel.setActionStack(melsActionStack);
-					}
-				}else  if (type.equalsIgnoreCase("astroid")) {
-					String sprite = element.getElementsByTagName("sprite").item(0).getTextContent();
-					FlatLanderWrper mel = new FlatLanderWrper( xpos, ypos, zpos, name, 0,true,false, TypeOfEntity.MONSTER, Color.BLUE);
-					
-					
-					mel.setSprite(new Astroid(sprite,0,0,100,100));
-					while(!FlatLandFacebook.getInstance().requestToken(this)) {}
-					FlatLandFacebook.getInstance().add(mel,this);
-					FlatLandFacebook.getInstance().releaseToken(this);
-					Node item = element.getElementsByTagName("preferdAction").item(0);
-					Element prefAction = (Element) item;
-					if (prefAction != null) {
-						ActionsInterface prefdAction = getPreferedAction(prefAction, mel, flatLand);
-						mel.setPreferedAction(prefdAction);
-					}
-					Node stack = element.getElementsByTagName("actionStack").item(0);
-					Element actionStack = (Element) stack;
-					if (actionStack != null) {
-						ActionStack melsActionStack = buildTheActionStack(actionStack, mel, flatLand);
-						mel.setActionStack(melsActionStack);
-					}
-				}else  if (type.equalsIgnoreCase("glizzy")) {
-					String sprite = element.getElementsByTagName("sprite").item(0).getTextContent();
-					FlatLanderWrper mel = new FlatLanderWrper( xpos, ypos, zpos, name, 0,true,false, TypeOfEntity.MONSTER, Color.BLUE);
-					
-					
-					mel.setSprite(new Glizzy(sprite,32,32));
-					while(!FlatLandFacebook.getInstance().requestToken(this)) {}
-					FlatLandFacebook.getInstance().add(mel,this);
-					FlatLandFacebook.getInstance().releaseToken(this);
-					Node item = element.getElementsByTagName("preferdAction").item(0);
-					Element prefAction = (Element) item;
-					if (prefAction != null) {
-						ActionsInterface prefdAction = getPreferedAction(prefAction, mel, flatLand);
-						mel.setPreferedAction(prefdAction);
-					}
-					Node stack = element.getElementsByTagName("actionStack").item(0);
-					Element actionStack = (Element) stack;
-					if (actionStack != null) {
-						ActionStack melsActionStack = buildTheActionStack(actionStack, mel, flatLand);
-						mel.setActionStack(melsActionStack);
-					}
-				} else if (type.equalsIgnoreCase("ZombieBaby")) {
+//					mel.setSprite(new Ship(sprite));
+//					while(!FlatLandFacebook.getInstance().requestToken(this)) {}
+//					FlatLandFacebook.getInstance().add(mel,this);
+//					FlatLandFacebook.getInstance().releaseToken(this);
+//					Node item = element.getElementsByTagName("preferdAction").item(0);
+//					Element prefAction = (Element) item;
+//					if (prefAction != null) {
+//						ActionsInterface prefdAction = getPreferedAction(prefAction, mel, flatLand);
+//						mel.setPreferedAction(prefdAction);
+//					}
+//					Node stack = element.getElementsByTagName("actionStack").item(0);
+//					Element actionStack = (Element) stack;
+//					if (actionStack != null) {
+//						ActionStack melsActionStack = buildTheActionStack(actionStack, mel, flatLand);
+//						mel.setActionStack(melsActionStack);
+//					}
+//				}else  if (type.equalsIgnoreCase("astroid")) {
+//					String sprite = element.getElementsByTagName("sprite").item(0).getTextContent();
+//					FlatLanderWrper mel = new FlatLanderWrper( xpos, ypos, zpos, name, 0,true,false, TypeOfEntity.MONSTER, Color.BLUE);
+//					
+//					
+//					mel.setSprite(new Astroid(sprite,0,0,100,100));
+//					while(!FlatLandFacebook.getInstance().requestToken(this)) {}
+//					FlatLandFacebook.getInstance().add(mel,this);
+//					FlatLandFacebook.getInstance().releaseToken(this);
+//					Node item = element.getElementsByTagName("preferdAction").item(0);
+//					Element prefAction = (Element) item;
+//					if (prefAction != null) {
+//						ActionsInterface prefdAction = getPreferedAction(prefAction, mel, flatLand);
+//						mel.setPreferedAction(prefdAction);
+//					}
+//					Node stack = element.getElementsByTagName("actionStack").item(0);
+//					Element actionStack = (Element) stack;
+//					if (actionStack != null) {
+//						ActionStack melsActionStack = buildTheActionStack(actionStack, mel, flatLand);
+//						mel.setActionStack(melsActionStack);
+//					}
+//				}else  if (type.equalsIgnoreCase("glizzy")) {
+//					String sprite = element.getElementsByTagName("sprite").item(0).getTextContent();
+//					FlatLanderWrper mel = new FlatLanderWrper( xpos, ypos, zpos, name, 0,true,false, TypeOfEntity.MONSTER, Color.BLUE);
+//					
+//					
+//					mel.setSprite(new Glizzy(sprite,32,32));
+//					while(!FlatLandFacebook.getInstance().requestToken(this)) {}
+//					FlatLandFacebook.getInstance().add(mel,this);
+//					FlatLandFacebook.getInstance().releaseToken(this);
+//					Node item = element.getElementsByTagName("preferdAction").item(0);
+//					Element prefAction = (Element) item;
+//					if (prefAction != null) {
+//						ActionsInterface prefdAction = getPreferedAction(prefAction, mel, flatLand);
+//						mel.setPreferedAction(prefdAction);
+//					}
+//					Node stack = element.getElementsByTagName("actionStack").item(0);
+//					Element actionStack = (Element) stack;
+//					if (actionStack != null) {
+//						ActionStack melsActionStack = buildTheActionStack(actionStack, mel, flatLand);
+//						mel.setActionStack(melsActionStack);
+//					}
+			//}
+			else 
+					if (type.equalsIgnoreCase("ZombieBaby")) {
 					String sprite = element.getElementsByTagName("sprite").item(0).getTextContent();
 					FlatLanderWrper mel = new FlatLanderWrper( xpos, ypos, zpos, name, 0,true,true, TypeOfEntity.MONSTER, Color.BLUE);
 					mel.setSprite(new ZombieBaby(sprite,scale));
