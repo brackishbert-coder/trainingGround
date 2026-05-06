@@ -184,13 +184,20 @@ public class Interpreter extends Thread implements Declaration.Visitor<Object> {
 		public final java.util.List<String> linkNames;
 		public final String templateName;
 		public final java.util.List<Expr.SlotDescriptor> slots;
+		public final String mirrorTypeName;
+		public final java.util.List<String> mirrorLinkNames;
+		public final String mirrorTemplateName;
 		public BoxClass resolvedTemplate; // null until a matching template is declared
 		public UserTypeEntry(String typeName, java.util.List<String> linkNames,
-				String templateName, java.util.List<Expr.SlotDescriptor> slots) {
+				String templateName, java.util.List<Expr.SlotDescriptor> slots,
+				String mirrorTypeName, java.util.List<String> mirrorLinkNames, String mirrorTemplateName) {
 			this.typeName = typeName;
 			this.linkNames = linkNames != null ? linkNames : new java.util.ArrayList<>();
 			this.templateName = templateName;
 			this.slots = slots != null ? slots : new java.util.ArrayList<>();
+			this.mirrorTypeName = mirrorTypeName;
+			this.mirrorLinkNames = mirrorLinkNames != null ? mirrorLinkNames : new java.util.ArrayList<>();
+			this.mirrorTemplateName = mirrorTemplateName;
 		}
 	}
 	public final java.util.List<UserTypeEntry> userTypeRegistry = new java.util.ArrayList<>();
@@ -8345,11 +8352,44 @@ Object returnObject=null;
 		java.util.List<Expr.SlotDescriptor> slots = parseSlotDescriptors(expr.rawSlotTokens);
 		validateAnchorRule(slots, expr.typeName.lexeme);
 		expr.slots = slots;
+		String typeName = (String) expr.typeName.lexeme;
+		// mirror type name is mandatory and must be the exact reverse of the type name
+		if (expr.mirrorTypeName == null)
+			throw new RuntimeError(expr.typeName, "Type declaration '" + typeName + "' is missing closing mirror name");
+		String mirrorTypeName = (String) expr.mirrorTypeName.lexeme;
+		String expectedMirror = new StringBuilder(typeName).reverse().toString();
+		if (!expectedMirror.equals(mirrorTypeName))
+			throw new RuntimeError(expr.mirrorTypeName, "Mirror type name '" + mirrorTypeName
+					+ "' does not match reverse of '" + typeName + "' (expected '" + expectedMirror + "')");
 		java.util.List<String> linkNames = new java.util.ArrayList<>();
 		for (Token lt : expr.linkNames)
 			linkNames.add((String) lt.lexeme);
 		String templateName = expr.templateName != null ? (String) expr.templateName.lexeme : null;
-		UserTypeEntry entry = new UserTypeEntry((String) expr.typeName.lexeme, linkNames, templateName, slots);
+		// validate mirror link names: reversed, in reverse order
+		java.util.List<String> mirrorLinkNames = new java.util.ArrayList<>();
+		for (Token lt : expr.mirrorLinkNames)
+			mirrorLinkNames.add((String) lt.lexeme);
+		if (mirrorLinkNames.size() != linkNames.size())
+			throw new RuntimeError(expr.typeName, "Mirror link count does not match forward link count for type '" + typeName + "'");
+		for (int idx = 0; idx < linkNames.size(); idx++) {
+			String expectedMirrorLink = new StringBuilder(linkNames.get(linkNames.size() - 1 - idx)).reverse().toString();
+			if (!expectedMirrorLink.equals(mirrorLinkNames.get(idx)))
+				throw new RuntimeError(expr.typeName, "Mirror link name '" + mirrorLinkNames.get(idx)
+						+ "' does not match reverse of '" + linkNames.get(linkNames.size() - 1 - idx) + "'");
+		}
+		String mirrorTemplateName = expr.mirrorTemplateName != null ? (String) expr.mirrorTemplateName.lexeme : null;
+		if (templateName != null && mirrorTemplateName == null)
+			throw new RuntimeError(expr.typeName, "Type '" + typeName + "' has template but closing mirror is missing template name");
+		if (templateName == null && mirrorTemplateName != null)
+			throw new RuntimeError(expr.typeName, "Type '" + typeName + "' has mirror template name but no forward template");
+		if (templateName != null) {
+			String expectedMirrorTemplate = new StringBuilder(templateName).reverse().toString();
+			if (!expectedMirrorTemplate.equals(mirrorTemplateName))
+				throw new RuntimeError(expr.mirrorTemplateName, "Mirror template name '" + mirrorTemplateName
+						+ "' does not match reverse of '" + templateName + "' (expected '" + expectedMirrorTemplate + "')");
+		}
+		UserTypeEntry entry = new UserTypeEntry(typeName, linkNames, templateName, slots,
+				mirrorTypeName, mirrorLinkNames, mirrorTemplateName);
 		userTypeRegistry.add(entry);
 		// if template was already declared before this type, resolve immediately
 		if (templateName != null) {

@@ -25,6 +25,7 @@ public class InferenceMatcherTest {
     static Token id(String s) { return new Token(TokenType.IDENTIFIER, s, s, null, null, 0,0,0,0); }
     static Token tok(TokenType t) { return new Token(t, "", null, null, null, 0,0,0,0); }
     static Token str(String s) { return new Token(TokenType.STRING, "\""+s+"\"", s, null, null, 0,0,0,0); }
+    static Token rev(String s) { return id(new StringBuilder(s).reverse().toString()); }
 
     // @cat $$_^[chars...] catRev@
     static List<Token> slotMANY(String cat, String catRev, String... chars) {
@@ -72,7 +73,9 @@ public class InferenceMatcherTest {
         raw.addAll(slotMANY("fr", "rf", DIGITS));
         ArrayList<Token> links = new ArrayList<>();
         links.add(id("Arithmetic"));
-        Expr.UserType ut = new Expr.UserType(id("NumberFormatLong"), links, id("PreciseNumbers"), raw);
+        ArrayList<Token> mirrorLinks = new ArrayList<>(); mirrorLinks.add(rev("Arithmetic"));
+        Expr.UserType ut = new Expr.UserType(id("NumberFormatLong"), links, id("PreciseNumbers"), raw,
+                rev("NumberFormatLong"), mirrorLinks, rev("PreciseNumbers"));
         List<Declaration> stmts = new ArrayList<>();
         stmts.add(new StmtDecl(new Stmt.Expression(ut, null)));
         i.interpret(stmts);
@@ -158,9 +161,9 @@ public class InferenceMatcherTest {
             List<Token> rawB = new ArrayList<>(slotXOR("v", "v", "x", "y"));
             List<Declaration> stmts = new ArrayList<>();
             stmts.add(new StmtDecl(new Stmt.Expression(
-                new Expr.UserType(id("TypeA"), new ArrayList<>(), null, rawA), null)));
+                new Expr.UserType(id("TypeA"), new ArrayList<>(), null, rawA, rev("TypeA"), new ArrayList<>(), null), null)));
             stmts.add(new StmtDecl(new Stmt.Expression(
-                new Expr.UserType(id("TypeB"), new ArrayList<>(), null, rawB), null)));
+                new Expr.UserType(id("TypeB"), new ArrayList<>(), null, rawB, rev("TypeB"), new ArrayList<>(), null), null)));
             i.interpret(stmts);
             // "x" matches TypeA (first)
             BoxInstance r = infer(i, "x");

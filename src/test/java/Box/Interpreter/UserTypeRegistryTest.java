@@ -31,6 +31,7 @@ public class UserTypeRegistryTest {
     static Token str(String s) {
         return new Token(TokenType.STRING, "\"" + s + "\"", s, null, null, 0, 0, 0, 0);
     }
+    static Token rev(String s) { return id(new StringBuilder(s).reverse().toString()); }
 
     static Interpreter interp(Expr.UserType ut) {
         Interpreter i = new Interpreter();
@@ -93,7 +94,7 @@ public class UserTypeRegistryTest {
         System.out.println("--- simple type registers with one slot ---");
         {
             List<Token> raw = new ArrayList<>(slots_ONE("sg", "gs"));
-            Expr.UserType ut = new Expr.UserType(id("Foo"), new ArrayList<>(), null, raw);
+            Expr.UserType ut = new Expr.UserType(id("Foo"), new ArrayList<>(), null, raw, rev("Foo"), new ArrayList<>(), null);
             Interpreter i = interp(ut);
             ok(i.userTypeRegistry.size() == 1, "registry size 1");
             Interpreter.UserTypeEntry e = i.userTypeRegistry.get(0);
@@ -106,7 +107,7 @@ public class UserTypeRegistryTest {
         System.out.println("--- ONE slot descriptor fields ---");
         {
             List<Token> raw = new ArrayList<>(slots_ONE("sg", "gs"));
-            Expr.UserType ut = new Expr.UserType(id("Foo"), new ArrayList<>(), null, raw);
+            Expr.UserType ut = new Expr.UserType(id("Foo"), new ArrayList<>(), null, raw, rev("Foo"), new ArrayList<>(), null);
             Interpreter i = interp(ut);
             Expr.SlotDescriptor s = i.userTypeRegistry.get(0).slots.get(0);
             eq("sg", s.category, "category=sg");
@@ -117,7 +118,7 @@ public class UserTypeRegistryTest {
         System.out.println("--- MANY slot descriptor ---");
         {
             List<Token> raw = new ArrayList<>(slots_MANY("in", "ni", "0","1","2"));
-            Expr.UserType ut = new Expr.UserType(id("Foo"), new ArrayList<>(), null, raw);
+            Expr.UserType ut = new Expr.UserType(id("Foo"), new ArrayList<>(), null, raw, rev("Foo"), new ArrayList<>(), null);
             Interpreter i = interp(ut);
             Expr.SlotDescriptor s = i.userTypeRegistry.get(0).slots.get(0);
             eq("in", s.category, "category=in");
@@ -129,7 +130,7 @@ public class UserTypeRegistryTest {
         System.out.println("--- literal slot ---");
         {
             List<Token> raw = new ArrayList<>(slots_LIT("dp", ".", "pd"));
-            Expr.UserType ut = new Expr.UserType(id("Foo"), new ArrayList<>(), null, raw);
+            Expr.UserType ut = new Expr.UserType(id("Foo"), new ArrayList<>(), null, raw, rev("Foo"), new ArrayList<>(), null);
             Interpreter i = interp(ut);
             Expr.SlotDescriptor s = i.userTypeRegistry.get(0).slots.get(0);
             eq("dp", s.category, "category=dp");
@@ -140,7 +141,7 @@ public class UserTypeRegistryTest {
         System.out.println("--- exclusive OR slot ---");
         {
             List<Token> raw = new ArrayList<>(slots_ONE_XOR("sg", "gs", "", "-"));
-            Expr.UserType ut = new Expr.UserType(id("Foo"), new ArrayList<>(), null, raw);
+            Expr.UserType ut = new Expr.UserType(id("Foo"), new ArrayList<>(), null, raw, rev("Foo"), new ArrayList<>(), null);
             Interpreter i = interp(ut);
             Expr.SlotDescriptor s = i.userTypeRegistry.get(0).slots.get(0);
             ok(s.exclusiveOr, "exclusiveOr=true");
@@ -154,7 +155,10 @@ public class UserTypeRegistryTest {
             List<Token> raw = new ArrayList<>(slots_ONE("sg", "gs"));
             ArrayList<Token> links = new ArrayList<>();
             links.add(id("Arithmetic"));
-            Expr.UserType ut = new Expr.UserType(id("NumberFormatLong"), links, id("PreciseNumbers"), raw);
+            ArrayList<Token> mirrorLinks = new ArrayList<>();
+            mirrorLinks.add(rev("Arithmetic"));
+            Expr.UserType ut = new Expr.UserType(id("NumberFormatLong"), links, id("PreciseNumbers"), raw,
+                    rev("NumberFormatLong"), mirrorLinks, rev("PreciseNumbers"));
             Interpreter i = interp(ut);
             Interpreter.UserTypeEntry e = i.userTypeRegistry.get(0);
             eq("NumberFormatLong", e.typeName, "typeName");
@@ -168,9 +172,9 @@ public class UserTypeRegistryTest {
             i.setForward(true);
             List<Declaration> stmts = new ArrayList<>();
             stmts.add(new StmtDecl(new Stmt.Expression(
-                    new Expr.UserType(id("A"), new ArrayList<>(), null, new ArrayList<>(slots_ONE("sg","gs"))), null)));
+                    new Expr.UserType(id("A"), new ArrayList<>(), null, new ArrayList<>(slots_ONE("sg","gs")), rev("A"), new ArrayList<>(), null), null)));
             stmts.add(new StmtDecl(new Stmt.Expression(
-                    new Expr.UserType(id("B"), new ArrayList<>(), null, new ArrayList<>(slots_ONE("in","ni"))), null)));
+                    new Expr.UserType(id("B"), new ArrayList<>(), null, new ArrayList<>(slots_ONE("in","ni")), rev("B"), new ArrayList<>(), null), null)));
             i.interpret(stmts);
             ok(i.userTypeRegistry.size() == 2, "two types");
             eq("A", i.userTypeRegistry.get(0).typeName, "first=A");
@@ -183,7 +187,7 @@ public class UserTypeRegistryTest {
             raw.addAll(slots_MANY("a", "sa", "x"));
             raw.add(tok(TokenType.COMMA));
             raw.addAll(slots_MANY("b", "ab", "y"));
-            Expr.UserType ut = new Expr.UserType(id("Bad"), new ArrayList<>(), null, raw);
+            Expr.UserType ut = new Expr.UserType(id("Bad"), new ArrayList<>(), null, raw, rev("Bad"), new ArrayList<>(), null);
             boolean threw = false;
             try { interp(ut); } catch (RuntimeException ex) { threw = true; }
             ok(threw, "adjacent MANY without anchor rejected");
@@ -197,7 +201,7 @@ public class UserTypeRegistryTest {
             raw.addAll(slots_LIT("dp", ".", "pd"));
             raw.add(tok(TokenType.COMMA));
             raw.addAll(slots_MANY("fr", "rf", "0","1","2","3","4","5","6","7","8","9"));
-            Expr.UserType ut = new Expr.UserType(id("Num"), new ArrayList<>(), null, raw);
+            Expr.UserType ut = new Expr.UserType(id("Num"), new ArrayList<>(), null, raw, rev("Num"), new ArrayList<>(), null);
             Interpreter i = interp(ut);
             ok(i.userTypeRegistry.size() == 1, "registered");
             ok(i.userTypeRegistry.get(0).slots.size() == 3, "three slots");

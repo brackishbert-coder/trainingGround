@@ -35,9 +35,10 @@ public class KnotRunner {
     // Fields
     // -------------------------------------------------------------------------
 
-    private StmtEx       expression;
-    private Interpreter  interp;
-    private ControlGraph graph;
+    private StmtEx         expression;
+    private Interpreter    interp;
+    private ControlGraph   graph;
+    private TraversalEdge  priorEdge  = null;
     private final List<Object> routeTargets = new ArrayList<>();
 
     // -------------------------------------------------------------------------
@@ -56,15 +57,17 @@ public class KnotRunner {
     // Main execution loop
     // -------------------------------------------------------------------------
 
+    public TraversalEdge getPriorEdge() { return priorEdge; }
+    public ControlGraph  getGraph()     { return graph; }
+
     public ArrayList<Object> runKnot() {
         int count = interp.isForward() ? 0 : expression.size() - 1;
         ArrayList<Object> notnull = new ArrayList<>();
+        priorEdge = null;
 
         while (count >= 0 && count < expression.size()) {
             if (graph.getNodeAt(count) != null) {
-                Integer next = interp.isForward()
-                        ? stepForwardControl(count)
-                        : stepBackwardControl(count);
+                Integer next = selectStep(count);
                 if (next != null) {
                     count = next;
                     continue;
@@ -81,30 +84,44 @@ public class KnotRunner {
     public ArrayList<Object> runTonk() { return runKnot(); }
 
     // -------------------------------------------------------------------------
-    // Control-flow stepping
+    // Phase C: edge-driven control step
     // -------------------------------------------------------------------------
 
-    private Integer stepForwardControl(int index) {
-        // Oscillation: standing on the false-exit of a forward condition.
+    /**
+     * Select and follow the outgoing edge from the control node at {@code index}.
+     * Evaluates conditions, applies direction flips as side effects, sets priorEdge.
+     * Returns the next count to jump to, or null if no control action (fall through
+     * to body execution and advanceOne).
+     */
+    private Integer selectStep(int index) {
+        return interp.isForward() ? selectStepForward(index) : selectStepBackward(index);
+    }
+
+    private Integer selectStepForward(int index) {
+        // Oscillation: at false-exit of a forward condition.
         int fwdFalseStart = graph.forwardConditionStartForFalseExit(index);
         if (fwdFalseStart != -1) {
             int trueIndex = graph.forwardConditionTrueTarget(fwdFalseStart);
             if (checkConditionRange(fwdFalseStart, trueIndex)) {
                 interp.setForward(false);
-                return index - 1;
+                priorEdge = condEdge(fwdFalseStart, EdgeKind.CONDITION_TRUE);
+                return priorEdge != null ? priorEdge.to.expressionIndex : index - 1;
             } else {
+                priorEdge = condEdge(fwdFalseStart, EdgeKind.CONDITION_FALSE);
                 return expression.size();
             }
         }
 
-        // Oscillation: standing on the true-entry of a backward condition (re-check after forward pass).
+        // Oscillation: at true-entry of a backward condition (re-check after forward pass).
         int bwdTrueStart = graph.backwardConditionStartForTrueEntry(index);
         if (bwdTrueStart != -1) {
             int bwdTrueIndex = graph.backwardConditionTrueTarget(bwdTrueStart);
             if (checkConditionRangeBackward(bwdTrueStart, bwdTrueIndex)) {
                 interp.setForward(false);
-                return index - 1;
+                priorEdge = condEdge(bwdTrueStart, EdgeKind.CONDITION_TRUE);
+                return priorEdge != null ? priorEdge.to.expressionIndex : index - 1;
             } else {
+                priorEdge = condEdge(bwdTrueStart, EdgeKind.CONDITION_FALSE);
                 return expression.size();
             }
         }
@@ -115,40 +132,62 @@ public class KnotRunner {
             int trueIndex  = graph.forwardConditionTrueTarget(index);
             int falseIndex = graph.forwardConditionFalseTarget(index);
             boolean met = checkConditionRange(startIndex, trueIndex);
+            priorEdge = condEdge(startIndex, met ? EdgeKind.CONDITION_TRUE : EdgeKind.CONDITION_FALSE);
+            if (priorEdge != null) return priorEdge.to.expressionIndex;
             int target = met ? trueIndex : falseIndex;
             if (target >= 0) return target + 1;
         }
 
-        // Forward structural boundary: flip to backward.
+        // UNWIND: region ahead is a structural escape (same-family close..close).
+        ControlRegion ahead = graph.getRegionStartingAt(index);
+        if (ahead != null && ahead.regionKind == RegionKind.UNWIND) {
+            TraversalEdge e = unwindEdgeForward(index);
+            if (e != null) { priorEdge = e; return e.to.expressionIndex; }
+        }
+
+        // ENTRY: region ahead is a structural descent (same-family open..open).
+        if (ahead != null && (ahead.regionKind == RegionKind.POCKET_ENTRY
+                           || ahead.regionKind == RegionKind.CUP_ENTRY)) {
+            TraversalEdge e = entryEdgeForward(index);
+            if (e != null) { priorEdge = e; return e.to.expressionIndex; }
+        }
+
+        // Forward structural boundary: flip to backward and follow backward adjacency.
         if (isForwardBoundary(index)) {
             interp.setForward(false);
-            return index - 1;
+            priorEdge = null;
+            TraversalEdge back = condEdge(index, EdgeKind.BACKWARD_ADJACENCY);
+            return back != null ? back.to.expressionIndex : index - 1;
         }
 
         return null;
     }
 
-    private Integer stepBackwardControl(int index) {
-        // Oscillation: standing on the false-exit of a backward condition.
+    private Integer selectStepBackward(int index) {
+        // Oscillation: at false-exit of a backward condition.
         int bwdFalseStart = graph.backwardConditionStartForFalseExit(index);
         if (bwdFalseStart != -1) {
             int trueIndex = graph.backwardConditionTrueTarget(bwdFalseStart);
             if (checkConditionRangeBackward(bwdFalseStart, trueIndex)) {
                 interp.setForward(true);
-                return index + 1;
+                priorEdge = condEdge(bwdFalseStart, EdgeKind.CONDITION_TRUE);
+                return priorEdge != null ? priorEdge.to.expressionIndex : index + 1;
             } else {
+                priorEdge = condEdge(bwdFalseStart, EdgeKind.CONDITION_FALSE);
                 return -1;
             }
         }
 
-        // Oscillation: standing on the true-entry of a forward condition (re-check after backward pass).
+        // Oscillation: at true-entry of a forward condition (re-check after backward pass).
         int fwdTrueStart = graph.forwardConditionStartForTrueEntry(index);
         if (fwdTrueStart != -1) {
             int fwdTrueIndex = graph.forwardConditionTrueTarget(fwdTrueStart);
             if (checkConditionRange(fwdTrueStart, fwdTrueIndex)) {
                 interp.setForward(true);
-                return index + 1;
+                priorEdge = condEdge(fwdTrueStart, EdgeKind.CONDITION_TRUE);
+                return priorEdge != null ? priorEdge.to.expressionIndex : index + 1;
             } else {
+                priorEdge = condEdge(fwdTrueStart, EdgeKind.CONDITION_FALSE);
                 return -1;
             }
         }
@@ -159,14 +198,32 @@ public class KnotRunner {
             int trueIndex  = graph.backwardConditionTrueTarget(index);
             int falseIndex = graph.backwardConditionFalseTarget(index);
             boolean met = checkConditionRangeBackward(startIndex, trueIndex);
+            priorEdge = condEdge(startIndex, met ? EdgeKind.CONDITION_TRUE : EdgeKind.CONDITION_FALSE);
+            if (priorEdge != null) return priorEdge.to.expressionIndex;
             int target = met ? trueIndex : falseIndex;
             if (target >= 0) return target - 1;
         }
 
-        // Backward structural boundary: flip to forward.
+        // UNWIND: region behind is a structural escape (same-family close..close).
+        ControlRegion behind = graph.getRegionEndingAt(index);
+        if (behind != null && behind.regionKind == RegionKind.UNWIND) {
+            TraversalEdge e = unwindEdgeBackward(index);
+            if (e != null) { priorEdge = e; return e.to.expressionIndex; }
+        }
+
+        // ENTRY: region behind is a structural descent (same-family open..open).
+        if (behind != null && (behind.regionKind == RegionKind.POCKET_ENTRY
+                            || behind.regionKind == RegionKind.CUP_ENTRY)) {
+            TraversalEdge e = entryEdgeBackward(index);
+            if (e != null) { priorEdge = e; return e.to.expressionIndex; }
+        }
+
+        // Backward structural boundary: flip to forward and follow forward adjacency.
         if (isBackwardBoundary(index)) {
             interp.setForward(true);
-            return index + 1;
+            priorEdge = null;
+            TraversalEdge fwd = condEdge(index, EdgeKind.FORWARD_ADJACENCY);
+            return fwd != null ? fwd.to.expressionIndex : index + 1;
         }
 
         return null;
@@ -178,6 +235,92 @@ public class KnotRunner {
 
     private boolean isForwardBoundary(int index)  { return index == expression.size() - 1; }
     private boolean isBackwardBoundary(int index) { return index == 0; }
+
+    /** Find the first outgoing edge of the given kind from the node at nodeIndex. */
+    private TraversalEdge condEdge(int nodeIndex, EdgeKind kind) {
+        ControlNode n = graph.getNodeAt(nodeIndex);
+        if (n == null) return null;
+        for (TraversalEdge e : graph.outEdges(n))
+            if (e.kind == kind) return e;
+        return null;
+    }
+
+    /** UNWIND edge going forward: targets the enclosing pair's CLOSE node. */
+    private TraversalEdge unwindEdgeForward(int nodeIndex) {
+        ControlNode n = graph.getNodeAt(nodeIndex);
+        if (n == null) return null;
+        for (TraversalEdge e : graph.outEdges(n))
+            if (e.kind == EdgeKind.UNWIND && e.to.polarity == ControlPolarity.CLOSE)
+                return e;
+        return null;
+    }
+
+    /** UNWIND edge going backward: targets the enclosing pair's OPEN node. */
+    private TraversalEdge unwindEdgeBackward(int nodeIndex) {
+        ControlNode n = graph.getNodeAt(nodeIndex);
+        if (n == null) return null;
+        for (TraversalEdge e : graph.outEdges(n))
+            if (e.kind == EdgeKind.UNWIND && e.to.polarity == ControlPolarity.OPEN)
+                return e;
+        return null;
+    }
+
+    /** ENTRY edge going forward: targets the nearest nested pair's OPEN node. */
+    private TraversalEdge entryEdgeForward(int nodeIndex) {
+        ControlNode n = graph.getNodeAt(nodeIndex);
+        if (n == null) return null;
+        for (TraversalEdge e : graph.outEdges(n))
+            if (e.kind == EdgeKind.ENTRY && e.to.polarity == ControlPolarity.OPEN)
+                return e;
+        return null;
+    }
+
+    /** ENTRY edge going backward: targets the nearest nested pair's CLOSE node. */
+    private TraversalEdge entryEdgeBackward(int nodeIndex) {
+        ControlNode n = graph.getNodeAt(nodeIndex);
+        if (n == null) return null;
+        for (TraversalEdge e : graph.outEdges(n))
+            if (e.kind == EdgeKind.ENTRY && e.to.polarity == ControlPolarity.CLOSE)
+                return e;
+        return null;
+    }
+
+    /**
+     * Phase C: condition-evaluating edge selector.
+     * Mirrors the priority order of selectStepForward/selectStepBackward.
+     * Returns the edge that would be selected for the given (index, direction) —
+     * does NOT evaluate conditions or apply direction flips; use selectStep for execution.
+     */
+    public TraversalEdge selectEdge(int index, boolean forward) {
+        ControlNode node = graph.getNodeAt(index);
+        if (node == null) return null;
+
+        if (forward) {
+            int fwdFalseStart = graph.forwardConditionStartForFalseExit(index);
+            if (fwdFalseStart != -1) return condEdge(fwdFalseStart, EdgeKind.CONDITION_TRUE);
+
+            int bwdTrueStart = graph.backwardConditionStartForTrueEntry(index);
+            if (bwdTrueStart != -1) return condEdge(bwdTrueStart, EdgeKind.CONDITION_TRUE);
+
+            if (graph.hasForwardCondition(index))
+                return condEdge(graph.forwardConditionStart(index), EdgeKind.CONDITION_TRUE);
+
+            if (isForwardBoundary(index)) return null;
+            return condEdge(index, EdgeKind.FORWARD_ADJACENCY);
+        } else {
+            int bwdFalseStart = graph.backwardConditionStartForFalseExit(index);
+            if (bwdFalseStart != -1) return condEdge(bwdFalseStart, EdgeKind.CONDITION_TRUE);
+
+            int fwdTrueStart = graph.forwardConditionStartForTrueEntry(index);
+            if (fwdTrueStart != -1) return condEdge(fwdTrueStart, EdgeKind.CONDITION_TRUE);
+
+            if (graph.hasBackwardCondition(index))
+                return condEdge(graph.backwardConditionStart(index), EdgeKind.CONDITION_TRUE);
+
+            if (isBackwardBoundary(index)) return null;
+            return condEdge(index, EdgeKind.BACKWARD_ADJACENCY);
+        }
+    }
 
     // -------------------------------------------------------------------------
     // Body execution

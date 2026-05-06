@@ -939,12 +939,16 @@ public abstract class Expr extends Declaration {
 	}
 
 	public static class UserType extends Expr {
-		public UserType(Token typeName, ArrayList<Token> linkNames, Token templateName, java.util.List<Token> rawSlotTokens) {
+		public UserType(Token typeName, ArrayList<Token> linkNames, Token templateName, java.util.List<Token> rawSlotTokens,
+				Token mirrorTypeName, ArrayList<Token> mirrorLinkNames, Token mirrorTemplateName) {
 			this.typeName = typeName;
 			this.linkNames = linkNames != null ? linkNames : new ArrayList<>();
 			this.templateName = templateName;
 			this.rawSlotTokens = rawSlotTokens != null ? rawSlotTokens : new ArrayList<>();
 			this.slots = new ArrayList<>();
+			this.mirrorTypeName = mirrorTypeName;
+			this.mirrorLinkNames = mirrorLinkNames != null ? mirrorLinkNames : new ArrayList<>();
+			this.mirrorTemplateName = mirrorTemplateName;
 		}
 
 		@Override
@@ -965,6 +969,12 @@ public abstract class Expr extends Declaration {
 		public java.util.List<Token> rawSlotTokens;
 		@JsonInclude(JsonInclude.Include.NON_NULL)
 		public java.util.List<SlotDescriptor> slots;
+		@JsonInclude(JsonInclude.Include.NON_NULL)
+		public Token mirrorTypeName;
+		@JsonInclude(JsonInclude.Include.NON_NULL)
+		public ArrayList<Token> mirrorLinkNames;
+		@JsonInclude(JsonInclude.Include.NON_NULL)
+		public Token mirrorTemplateName;
 	}
 
 	public static class Infer extends Expr {

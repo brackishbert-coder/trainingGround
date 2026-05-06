@@ -26,6 +26,7 @@ public class LazyTemplateResolutionTest {
     static Token id(String s) { return new Token(TokenType.IDENTIFIER, s, s, null, null, 0,0,0,0); }
     static Token tok(TokenType t) { return new Token(t, "", null, null, null, 0,0,0,0); }
     static Token strTok(String s) { return new Token(TokenType.STRING, "\""+s+"\"", s, null, null, 0,0,0,0); }
+    static Token rev(String s) { return id(new StringBuilder(s).reverse().toString()); }
     static String[] DIGITS = {"0","1","2","3","4","5","6","7","8","9"};
 
     // Build NumberFormatLong raw slot tokens
@@ -79,7 +80,9 @@ public class LazyTemplateResolutionTest {
         {
             Interpreter i = base();
             ArrayList<Token> links = new ArrayList<>(); links.add(id("Arithmetic"));
-            Expr.UserType ut = new Expr.UserType(id("NumberFormatLong"), links, id("PreciseNumbers"), nflSlots());
+            ArrayList<Token> mirrorLinks = new ArrayList<>(); mirrorLinks.add(rev("Arithmetic"));
+            Expr.UserType ut = new Expr.UserType(id("NumberFormatLong"), links, id("PreciseNumbers"), nflSlots(),
+                    rev("NumberFormatLong"), mirrorLinks, rev("PreciseNumbers"));
             List<Declaration> phase1 = new ArrayList<>();
             phase1.add(new StmtDecl(new Stmt.Expression(ut, null)));
             i.interpret(phase1);
@@ -107,7 +110,9 @@ public class LazyTemplateResolutionTest {
 
             // Now declare type
             ArrayList<Token> links = new ArrayList<>(); links.add(id("Arithmetic"));
-            Expr.UserType ut = new Expr.UserType(id("NumberFormatLong"), links, id("PreciseNumbers"), nflSlots());
+            ArrayList<Token> mirrorLinks = new ArrayList<>(); mirrorLinks.add(rev("Arithmetic"));
+            Expr.UserType ut = new Expr.UserType(id("NumberFormatLong"), links, id("PreciseNumbers"), nflSlots(),
+                    rev("NumberFormatLong"), mirrorLinks, rev("PreciseNumbers"));
             List<Declaration> phase2 = new ArrayList<>();
             phase2.add(new StmtDecl(new Stmt.Expression(ut, null)));
             i.interpret(phase2);
@@ -120,7 +125,8 @@ public class LazyTemplateResolutionTest {
         System.out.println("--- template never declared: resolvedTemplate stays null (string ops default) ---");
         {
             Interpreter i = base();
-            Expr.UserType ut = new Expr.UserType(id("Foo"), new ArrayList<>(), id("Missing"), nflSlots());
+            Expr.UserType ut = new Expr.UserType(id("Foo"), new ArrayList<>(), id("Missing"), nflSlots(),
+                    rev("Foo"), new ArrayList<>(), rev("Missing"));
             List<Declaration> stmts = new ArrayList<>();
             stmts.add(new StmtDecl(new Stmt.Expression(ut, null)));
             i.interpret(stmts);
@@ -130,7 +136,8 @@ public class LazyTemplateResolutionTest {
         System.out.println("--- type without template: resolvedTemplate stays null ---");
         {
             Interpreter i = base();
-            Expr.UserType ut = new Expr.UserType(id("Bare"), new ArrayList<>(), null, nflSlots());
+            Expr.UserType ut = new Expr.UserType(id("Bare"), new ArrayList<>(), null, nflSlots(),
+                    rev("Bare"), new ArrayList<>(), null);
             List<Declaration> stmts = new ArrayList<>();
             stmts.add(new StmtDecl(new Stmt.Expression(ut, null)));
             i.interpret(stmts);
@@ -140,8 +147,10 @@ public class LazyTemplateResolutionTest {
         System.out.println("--- two types, one template: only matching entry resolved ---");
         {
             Interpreter i = base();
-            Expr.UserType ut1 = new Expr.UserType(id("A"), new ArrayList<>(), id("PreciseNumbers"), nflSlots());
-            Expr.UserType ut2 = new Expr.UserType(id("B"), new ArrayList<>(), id("OtherTemplate"), nflSlots());
+            Expr.UserType ut1 = new Expr.UserType(id("A"), new ArrayList<>(), id("PreciseNumbers"), nflSlots(),
+                    rev("A"), new ArrayList<>(), rev("PreciseNumbers"));
+            Expr.UserType ut2 = new Expr.UserType(id("B"), new ArrayList<>(), id("OtherTemplate"), nflSlots(),
+                    rev("B"), new ArrayList<>(), rev("OtherTemplate"));
             List<Declaration> phase1 = new ArrayList<>();
             phase1.add(new StmtDecl(new Stmt.Expression(ut1, null)));
             phase1.add(new StmtDecl(new Stmt.Expression(ut2, null)));
@@ -158,7 +167,8 @@ public class LazyTemplateResolutionTest {
         System.out.println("--- resolved template is the same BoxClass as in globals ---");
         {
             Interpreter i = base();
-            Expr.UserType ut = new Expr.UserType(id("X"), new ArrayList<>(), id("PreciseNumbers"), nflSlots());
+            Expr.UserType ut = new Expr.UserType(id("X"), new ArrayList<>(), id("PreciseNumbers"), nflSlots(),
+                    rev("X"), new ArrayList<>(), rev("PreciseNumbers"));
             List<Declaration> phase1 = new ArrayList<>();
             phase1.add(new StmtDecl(new Stmt.Expression(ut, null)));
             phase1.add(templateDecl("PreciseNumbers"));

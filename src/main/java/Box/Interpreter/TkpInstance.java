@@ -190,7 +190,7 @@ public class TkpInstance extends PucInstance implements ITkp {
                                 PocketInstance pkt = new PocketInstance(boxClass, new ArrayList<>(body), expr, interpreter);
                                 destroyed = true; body.clear(); flows.clear();
                                 interpreter.bin.body.add("starvation: tkp->pkt pocket=" + nameToken.lexeme + " tick=" + tickCount);
-                                try { env.assign(nameToken, null, pkt, interpreter); } catch (RuntimeError ignored) {}
+                                try { env.assign(nameToken, (Token) null, pkt); } catch (RuntimeError ignored) {}
                                 return;
                             }
                     }
@@ -232,7 +232,7 @@ public class TkpInstance extends PucInstance implements ITkp {
                 }
                 if (heatDeath) {
                     PocketInstance pkt = seamCross();
-                    try { env.assign(nameToken, null, pkt, interpreter); } catch (RuntimeError ignored) {}
+                    try { env.assign(nameToken, (Token) null, pkt); } catch (RuntimeError ignored) {}
                     if (pkt.hasFlowsInBody()) pkt.startIndependent(env, nameToken);
                     return;
                 }
@@ -246,7 +246,7 @@ public class TkpInstance extends PucInstance implements ITkp {
     private void seamCrossAndUpdate() {
         if (tickEnv == null || tickName == null) { destroy(); return; }
         PocketInstance pkt = seamCross();
-        try { tickEnv.assign(tickName, null, pkt, interpreter); } catch (RuntimeError ignored) {}
+        try { tickEnv.assign(tickName, (Token) null, pkt); } catch (RuntimeError ignored) {}
         if (pkt.hasFlowsInBody()) pkt.startIndependent(tickEnv, tickName);
     }
 

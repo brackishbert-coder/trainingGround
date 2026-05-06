@@ -60,6 +60,8 @@ public class ParserTest {
 		List<Declaration> statements = new ArrayList<>();
 		tracker.parseForward();
 		while (!isAtEnd()) {
+			skipWhitespace();
+			if (isAtEnd()) break;
 			statements.add(declaration());
 		}
 		return statements;
@@ -750,6 +752,23 @@ public class ParserTest {
 				return new Token(TokenType.EOF, "", null, null, null, -1, -1, -1, -1);
 			return tracker.getToken(index);
 
+		}
+	}
+
+	private Token peekNonWS(int n) {
+		int i = 0, found = 0;
+		while (true) {
+			if (tracker.currentIndex() + i >= tracker.size())
+				return new Token(TokenType.EOF, "", null, null, null, -1, -1, -1, -1);
+			Token t = peekI(i);
+			if (t.type == TokenType.EOF) return t;
+			boolean ws = t.type == TokenType.SPACE || t.type == TokenType.NEWLINE
+					|| t.type == TokenType.TAB || t.type == TokenType.SPACERETURN;
+			if (!ws) {
+				if (found == n) return t;
+				found++;
+			}
+			i++;
 		}
 	}
 
@@ -1474,6 +1493,26 @@ public class ParserTest {
 			}
 		} else {
 
+			// whitespace-aware fast path for simple literal backward inference: 3.14 = c xob?
+			TokenType t0 = peekNonWS(0).type;
+			if (t0 == TokenType.DOUBLENUM || t0 == TokenType.INTNUM
+					|| t0 == TokenType.STRING || t0 == TokenType.BINNUM) {
+				if (peekNonWS(1).type == TokenType.ASIGNMENTEQUALS) {
+					if (peekNonWS(2).type == TokenType.IDENTIFIER) {
+						TokenType t3 = peekNonWS(3).type;
+						if (t3 == TokenType.INTNUM) {
+							TokenType t4 = peekNonWS(4).type;
+							if (t4 == TokenType.XOB || t4 == TokenType.PUC
+									|| t4 == TokenType.TEKCOP || t4 == TokenType.TONK)
+								return true;
+						} else if (t3 == TokenType.XOB || t3 == TokenType.PUC
+								|| t3 == TokenType.TEKCOP || t3 == TokenType.TONK) {
+							return true;
+						}
+					}
+				}
+			}
+
 			int count = 0;
 			while (peekI(count).type == TokenType.MINUS || peekI(count).type == TokenType.BANG
 					|| peekI(count).type == TokenType.BINNUM || peekI(count).type == TokenType.INTNUM
@@ -1580,7 +1619,7 @@ public class ParserTest {
 				|| check(TokenType.TEKCOP))
 			return true;
 		if (check(TokenType.QMARK)) {
-			TokenType next = peekI(1).type;
+			TokenType next = peekNonWS(1).type;
 			return next == TokenType.BOX || next == TokenType.XOB
 					|| next == TokenType.CUP || next == TokenType.PUC
 					|| next == TokenType.POCKET || next == TokenType.TEKCOP
@@ -1590,17 +1629,37 @@ public class ParserTest {
 	}
 
 	private boolean checkUserType() {
-		if (peekI(0).type != TokenType.IDENTIFIER)
-			return false;
-		Object lex = peekI(0).lexeme;
-		if (!(lex instanceof String) || !((String) lex).startsWith(":"))
-			return false;
-		return peekI(1).type == TokenType.OPENSQUARE;
+		// real scanner produces COLON for ':' followed immediately by the type name IDENTIFIER
+		return peekI(0).type == TokenType.COLON && peekI(1).type == TokenType.IDENTIFIER;
+	}
+
+	private void skipWhitespace() {
+		while (peek().type == TokenType.SPACE || peek().type == TokenType.NEWLINE
+				|| peek().type == TokenType.TAB || peek().type == TokenType.SPACERETURN) {
+			advance();
+		}
 	}
 
 	private Stmt userTypeStmt() {
-		Token headerToken = advance(); // ":TypeName&Link#Template"
-		consume(TokenType.OPENSQUARE, "expected '[' after type name");
+		advance(); // consume COLON
+		Token typeName = advance(); // consume type name IDENTIFIER
+
+		// link names: (&IDENTIFIER)*  — header is compact, no spaces
+		java.util.ArrayList<Token> linkNames = new java.util.ArrayList<>();
+		while (check(TokenType.SINGLEAND)) {
+			advance(); // consume &
+			linkNames.add(advance()); // consume link name
+		}
+
+		// optional template: #IDENTIFIER
+		Token templateName = null;
+		if (check(TokenType.HASH)) {
+			advance(); // consume #
+			templateName = advance(); // consume template name
+		}
+
+		// slot body: [ ... ]
+		consume(TokenType.OPENSQUARE, "expected '[' in type declaration");
 		java.util.List<Token> rawSlots = new java.util.ArrayList<>();
 		int depth = 1;
 		while (depth > 0 && !check(TokenType.EOF)) {
@@ -1613,35 +1672,42 @@ public class ParserTest {
 			}
 			rawSlots.add(advance());
 		}
-		consume(TokenType.CLOSEDSQUARE, "expected ']' to close type declaration");
-		// optional closing mirror identifier  e.g.  eman:  or  eman#Template&Link:
-		Token closingToken = null;
-		if (peekI(0).type == TokenType.IDENTIFIER) {
-			Object clex = peekI(0).lexeme;
-			if (clex instanceof String && ((String) clex).endsWith(":"))
-				closingToken = advance();
+		consume(TokenType.CLOSEDSQUARE, "expected ']' to close slot pattern");
+
+		// closing mirror — mandatory; structure is reverse of opening
+		// after ']' there may be whitespace (e.g. newline before mirror tokens)
+		skipWhitespace();
+
+		// if template present: reversedTemplateName #
+		Token mirrorTemplateName = null;
+		if (templateName != null) {
+			mirrorTemplateName = consume(TokenType.IDENTIFIER,
+					"expected reversed template name in closing mirror");
+			skipWhitespace();
+			consume(TokenType.HASH, "expected '#' after reversed template name in closing mirror");
+			skipWhitespace();
 		}
-		// parse header string   ":TypeName&Link1&Link2#TemplateName"
-		String header = (String) headerToken.lexeme;
-		String raw = header.substring(1); // strip leading ':'
-		int hashIdx = raw.indexOf('#');
-		String beforeHash = hashIdx >= 0 ? raw.substring(0, hashIdx) : raw;
-		Token templateName = null;
-		if (hashIdx >= 0) {
-			String tplName = raw.substring(hashIdx + 1);
-			templateName = new Token(TokenType.IDENTIFIER, tplName, tplName, null, null,
-					headerToken.column, headerToken.line, headerToken.start, headerToken.finish);
+
+		// mirror links in reverse order: (reversedLinkName &)*  — count matches forward
+		java.util.ArrayList<Token> mirrorLinkNames = new java.util.ArrayList<>();
+		for (int i = 0; i < linkNames.size(); i++) {
+			mirrorLinkNames.add(consume(TokenType.IDENTIFIER,
+					"expected reversed link name in closing mirror"));
+			skipWhitespace();
+			consume(TokenType.SINGLEAND, "expected '&' after reversed link name in closing mirror");
+			skipWhitespace();
 		}
-		String[] parts = beforeHash.split("&");
-		Token typeName = new Token(TokenType.IDENTIFIER, parts[0], parts[0], null, null,
-				headerToken.column, headerToken.line, headerToken.start, headerToken.finish);
-		java.util.ArrayList<Token> linkNames = new java.util.ArrayList<>();
-		for (int i = 1; i < parts.length; i++) {
-			linkNames.add(new Token(TokenType.IDENTIFIER, parts[i], parts[i], null, null,
-					headerToken.column, headerToken.line, headerToken.start, headerToken.finish));
-		}
-		Expr.UserType userType = new Expr.UserType(typeName, linkNames, templateName, rawSlots);
-		return new Stmt.Expression(userType, null);
+
+		// reversed type name  :
+		Token mirrorTypeName = consume(TokenType.IDENTIFIER,
+				"expected reversed type name in closing mirror");
+		skipWhitespace();
+		consume(TokenType.COLON, "expected ':' to close type declaration");
+
+		return new Stmt.Expression(
+				new Expr.UserType(typeName, linkNames, templateName, rawSlots,
+						mirrorTypeName, mirrorLinkNames, mirrorTemplateName),
+				null);
 	}
 
 	private boolean checkConsume() {
@@ -5099,16 +5165,21 @@ public class ParserTest {
 			infer = true;
 			advance(); // consume ?
 		}
+		skipWhitespace();
 		if (match(TokenType.BOX, TokenType.POCKET, TokenType.CUP, TokenType.KNOT, TokenType.TEKCOP,
 				TokenType.XOB, TokenType.PUC, TokenType.TONK)) {
 			type = previous();
+			skipWhitespace();
 			Expr num = null;
 			if (check(TokenType.INTNUM)) {
 				num = expressionnoisserpxe();
 				val = (int) (((Expr.Literal) num).value);
+				skipWhitespace();
 			}
 			ident = consume(TokenType.IDENTIFIER, "");
+			skipWhitespace();
 			if (match(TokenType.ASIGNMENTEQUALS)) {
+				skipWhitespace();
 				initialvalue = expressionnoisserpxe();
 				if (infer) {
 					initialvalue = new Expr.Infer(initialvalue);
@@ -5127,6 +5198,7 @@ public class ParserTest {
 
 	private Stmt rav() throws ParseError {
 		Expr initialValue = call();
+		skipWhitespace();
 		if (initialValue instanceof Expr.Box ||
 				initialValue instanceof Expr.Cup||
 				initialValue instanceof Expr.Pocket||
@@ -5136,19 +5208,19 @@ public class ParserTest {
 				initialValue instanceof Expr.Llac||initialValue instanceof Expr.Call) {
 			int val = 1;
 			consume(TokenType.ASIGNMENTEQUALS, "");
+			skipWhitespace();
 			Token idet =null;
 			if (check(TokenType.IDENTIFIER)) {
 				consume(TokenType.IDENTIFIER, "");
 				idet = previous();
-				
 			}else {
-				throw error(idet, " iidentifier is null",true); 
+				throw error(idet, " iidentifier is null",true);
 			}
-			
-			
+			skipWhitespace();
 			if (check(TokenType.INTNUM)) {
 				Expr num = primative();
 				val = (int) (((Expr.Literal) num).value);
+				skipWhitespace();
 			}
 
 			Token epyt = null;

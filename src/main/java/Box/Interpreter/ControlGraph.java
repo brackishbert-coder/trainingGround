@@ -81,6 +81,20 @@ public class ControlGraph {
     public List<TraversalEdge> getUnreachableEdges()  { return Collections.unmodifiableList(unreachable); }
     public CrossingCluster     getCrossings()          { return crossings; }
 
+    /** Region whose left boundary node is at startIndex, or null. */
+    public ControlRegion getRegionStartingAt(int startIndex) {
+        for (ControlRegion r : regions)
+            if (r.startIndex == startIndex) return r;
+        return null;
+    }
+
+    /** Region whose right boundary node is at endIndex, or null. */
+    public ControlRegion getRegionEndingAt(int endIndex) {
+        for (ControlRegion r : regions)
+            if (r.endIndex == endIndex) return r;
+        return null;
+    }
+
     // ---- UnreachableGraph region-level API -------------------------------------
 
     public void addUnreachableRegionEdge(UnreachableEdge edge) {

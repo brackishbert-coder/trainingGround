@@ -139,7 +139,7 @@ public class PocketInstance extends CupInstance implements IPkt {
 	private void seamCrossAndUpdate() {
 		if (tickEnv == null || tickName == null) { beginDeath(); return; }
 		TkpInstance tkp = seamCrossToTkp();
-		try { tickEnv.assign(tickName, null, tkp, interpreter); } catch (RuntimeError ignored) {}
+		try { tickEnv.assign(tickName, (Box.Token.Token) null, tkp); } catch (RuntimeError ignored) {}
 		tkp.startIndependent(tickEnv, tickName);
 	}
 
@@ -214,7 +214,7 @@ public class PocketInstance extends CupInstance implements IPkt {
 								TkpInstance tkp = new TkpInstance(boxClass, new ArrayList<>(body), expr, interpreter);
 								destroyed = true; stripping = false; body.clear(); flows.clear();
 								interpreter.bin.body.add("starvation: pkt->tkp pocket=" + nameToken.lexeme + " tick=" + tickCount);
-								try { tickEnv.assign(tickName, null, tkp, interpreter); } catch (RuntimeError ignored) {}
+								try { tickEnv.assign(tickName, (Box.Token.Token) null, tkp); } catch (RuntimeError ignored) {}
 								return;
 							}
 					}

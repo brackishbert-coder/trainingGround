@@ -25,6 +25,7 @@ public class InferEndToEndTest {
     static Token id(String s) { return new Token(TokenType.IDENTIFIER, s, s, null, null, 0,0,0,0); }
     static Token tok(TokenType t) { return new Token(t, "", null, null, null, 0,0,0,0); }
     static Token strTok(String s) { return new Token(TokenType.STRING, "\""+s+"\"", s, null, null, 0,0,0,0); }
+    static Token rev(String s) { return id(new StringBuilder(s).reverse().toString()); }
 
     static String[] DIGITS = {"0","1","2","3","4","5","6","7","8","9"};
 
@@ -59,7 +60,9 @@ public class InferEndToEndTest {
         raw.addAll(slotLIT("dp", ".", "pd")); raw.add(tok(TokenType.COMMA));
         raw.addAll(slotMANY("fr", "rf", DIGITS));
         ArrayList<Token> links = new ArrayList<>(); links.add(id("Arithmetic"));
-        Expr.UserType ut = new Expr.UserType(id("NumberFormatLong"), links, id("PreciseNumbers"), raw);
+        ArrayList<Token> mirrorLinks = new ArrayList<>(); mirrorLinks.add(rev("Arithmetic"));
+        Expr.UserType ut = new Expr.UserType(id("NumberFormatLong"), links, id("PreciseNumbers"), raw,
+                rev("NumberFormatLong"), mirrorLinks, rev("PreciseNumbers"));
         List<Declaration> stmts = new ArrayList<>();
         stmts.add(new StmtDecl(new Stmt.Expression(ut, null)));
         i.interpret(stmts);

@@ -31,6 +31,7 @@ public class BackwardInferTest {
     static Token id(String s) { return new Token(TokenType.IDENTIFIER, s, s, null, null, 0,0,0,0); }
     static Token tok(TokenType t) { return new Token(t, "", null, null, null, 0,0,0,0); }
     static Token strTok(String s) { return new Token(TokenType.STRING, "\""+s+"\"", s, null, null, 0,0,0,0); }
+    static Token rev(String s) { return id(new StringBuilder(s).reverse().toString()); }
 
     static String[] DIGITS = {"0","1","2","3","4","5","6","7","8","9"};
 
@@ -65,7 +66,9 @@ public class BackwardInferTest {
         raw.addAll(slotLIT("dp", ".", "pd")); raw.add(tok(TokenType.COMMA));
         raw.addAll(slotMANY("fr", "rf", DIGITS));
         ArrayList<Token> links = new ArrayList<>(); links.add(id("Arithmetic"));
-        Expr.UserType ut = new Expr.UserType(id("NumberFormatLong"), links, id("PreciseNumbers"), raw);
+        ArrayList<Token> mirrorLinks = new ArrayList<>(); mirrorLinks.add(rev("Arithmetic"));
+        Expr.UserType ut = new Expr.UserType(id("NumberFormatLong"), links, id("PreciseNumbers"), raw,
+                rev("NumberFormatLong"), mirrorLinks, rev("PreciseNumbers"));
         List<Declaration> stmts = new ArrayList<>();
         stmts.add(new StmtDecl(new Stmt.Expression(ut, ut)));
         interp.interpret(stmts);
@@ -121,7 +124,8 @@ public class BackwardInferTest {
         raw.addAll(slotLIT("dp", ".", "pd"));
         raw.add(tok(TokenType.COMMA));
         raw.addAll(slotMANY("fr", "rf", DIGITS));
-        Expr.UserType ut = new Expr.UserType(id("NumberFormatLong"), new ArrayList<>(), null, raw);
+        Expr.UserType ut = new Expr.UserType(id("NumberFormatLong"), new ArrayList<>(), null, raw,
+                rev("NumberFormatLong"), new ArrayList<>(), null);
         i.interpret(Arrays.asList(new StmtDecl(new Stmt.Expression(ut, null))));
 
         // forward ?box c = 3.14  →  infer "3.14"  → matched
@@ -182,7 +186,8 @@ public class BackwardInferTest {
         raw.addAll(slotLIT("dp", ".", "pd"));
         raw.add(tok(TokenType.COMMA));
         raw.addAll(slotMANY("fr", "rf", DIGITS));
-        Expr.UserType ut = new Expr.UserType(id("NumberFormatLong"), new ArrayList<>(), null, raw);
+        Expr.UserType ut = new Expr.UserType(id("NumberFormatLong"), new ArrayList<>(), null, raw,
+                rev("NumberFormatLong"), new ArrayList<>(), null);
         fwd.interpret(Arrays.asList(new StmtDecl(new Stmt.Expression(ut, null))));
         Token nameF = id("c");
         Token typeF = new Token(TokenType.BOX, "box", null, null, null, 0,0,0,0);
@@ -252,7 +257,8 @@ public class BackwardInferTest {
         raw.addAll(slotLIT("dp", ".", "pd"));
         raw.add(tok(TokenType.COMMA));
         raw.addAll(slotMANY("fr", "rf", DIGITS));
-        Expr.UserType ut = new Expr.UserType(id("NumberFormatLong"), new ArrayList<>(), null, raw);
+        Expr.UserType ut = new Expr.UserType(id("NumberFormatLong"), new ArrayList<>(), null, raw,
+                rev("NumberFormatLong"), new ArrayList<>(), null);
         i.interpret(Arrays.asList(new StmtDecl(new Stmt.Expression(ut, null))));
 
         // isBackward=true on a literal "41.3" should match as "3.14"
