@@ -452,7 +452,12 @@ public class Grouper {
 		} else {
 			if (tok.get(containerIndexes2.getStart()).identifierToken != null) {
 				if (tok.get(containerIndexes2.getEnd()).reifitnediToken != null) {
-
+					if (containerIndexes2.isKnot() && tok.get(containerIndexes2.getStart()).type == open) {
+						String identLexeme = tok.get(containerIndexes2.getStart()).identifierToken.lexeme;
+						String reifLexeme  = tok.get(containerIndexes2.getEnd()).reifitnediToken.lexeme;
+						labelKnotInners(tok, containerIndexes2, identLexeme, reifLexeme);
+						renameBetweenStartAndEnd(containerIndexes2.getStart(), containerIndexes2.getEnd(), identLexeme, tok);
+					}
 				} else {
 					String reverseReif = reverseTokenLexeme(tok.get(containerIndexes2.getStart()).identifierToken);
 					Token reif = tok.get(containerIndexes2.getStart()).identifierToken;
@@ -633,17 +638,43 @@ public class Grouper {
 	}
 
 	private void renameOpenCloseKnot(ArrayList<Token> tok, ContainerIndexes containerIndexes2, TokenType open) {
-		Token ident = null;
-		String identLexeme = "";
-		String reverseReif = "";
-		String reifLexeme = "";
-
-		reverseReif = reverse(identifiersParen.get(identParenCount) + "");
-		identLexeme = "knot" + identifiersParen.get(identParenCount);
-		reifLexeme = reverseReif + "tonk";
+		String reverseReif = reverse(identifiersParen.get(identParenCount) + "");
+		String identLexeme = "knot" + identifiersParen.get(identParenCount);
+		String reifLexeme = reverseReif + "tonk";
 		identParenCount++;
-		renameIdentReif(tok, containerIndexes2, identLexeme, reifLexeme);
 
+		renameIdentReif(tok, containerIndexes2, identLexeme, reifLexeme);
+		labelKnotInners(tok, containerIndexes2, identLexeme, reifLexeme);
+	}
+
+	// Label all unlabeled inner brackets in a KNOT span with the given base labels.
+	// Nested sub-containers are already labeled before this runs, so only crossing
+	// brackets remain unlabeled — they all share the same base knot label so that
+	// buildMatchTable can form the correct same-family pairs.
+	private void labelKnotInners(ArrayList<Token> tok, ContainerIndexes ci, String identLexeme, String reifLexeme) {
+		int start = ci.getStart();
+		int end   = ci.getEnd();
+		for (int i = start + 1; i < end; i++) {
+			Token t = tok.get(i);
+			if (t.isFlow) continue;
+			if ((t.type == TokenType.OPENPAREN || t.type == TokenType.OPENBRACE) && t.identifierToken == null) {
+				String bracket = (t.type == TokenType.OPENPAREN) ? "(" : "{";
+				Token ident = new Token(TokenType.IDENTIFIER, identLexeme, null, null, null, -1, -1, -1, -1);
+				ident.column = t.column; ident.line = t.line;
+				ident.start  = t.start;  ident.finish = t.start;
+				t.identifierToken = ident;
+				t.lexeme  = identLexeme + bracket;
+				t.literal = t.lexeme;
+			} else if ((t.type == TokenType.CLOSEDPAREN || t.type == TokenType.CLOSEDBRACE) && t.reifitnediToken == null) {
+				String bracket = (t.type == TokenType.CLOSEDPAREN) ? ")" : "}";
+				Token reif = new Token(TokenType.IDENTIFIER, reifLexeme, null, null, null, -1, -1, -1, -1);
+				reif.column = t.column; reif.line = t.line;
+				reif.start  = t.start;  reif.finish = t.start;
+				t.reifitnediToken = reif;
+				t.lexeme  = bracket + reifLexeme;
+				t.literal = t.lexeme;
+			}
+		}
 	}
 
 	private void renameIdentReif(ArrayList<Token> tok, ContainerIndexes containerIndexes2, String identLexeme,

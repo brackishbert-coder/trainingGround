@@ -1,0 +1,1079 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>PCB Knot Workbench</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Courier New', monospace; background: #0d1117; color: #c9d1d9; padding: 28px; }
+    h1  { color: #58a6ff; font-size: 18px; letter-spacing: 2px; margin-bottom: 20px; }
+    h2  { color: #8b949e; font-size: 12px; letter-spacing: 2px; margin: 24px 0 10px;
+          border-bottom: 1px solid #21262d; padding-bottom: 5px; }
+    .input-row { display: flex; gap: 10px; align-items: center; margin-bottom: 10px; }
+    input[type=text] {
+      flex: 1; max-width: 640px; font-family: 'Courier New', monospace;
+      font-size: 22px; letter-spacing: 3px; padding: 10px 14px;
+      background: #161b22; color: #c9d1d9; border: 1px solid #30363d;
+      border-radius: 6px; outline: none;
+    }
+    input[type=text]:focus { border-color: #58a6ff; }
+    button, .ex-btn, .tb {
+      padding: 6px 14px; background: #21262d; color: #8b949e;
+      border: 1px solid #30363d; border-radius: 4px; cursor: pointer;
+      font-family: 'Courier New', monospace; font-size: 12px; letter-spacing: .5px;
+    }
+    button:hover, .ex-btn:hover { background: #30363d; color: #c9d1d9; }
+    .tb.active { background: #1f3a5c; border-color: #58a6ff; color: #58a6ff; }
+    #status { font-size: 14px; margin-bottom: 10px; min-height: 18px; }
+    .valid   { color: #3fb950; font-weight: bold; }
+    .invalid { color: #f85149; font-weight: bold; }
+    canvas   { background: #161b22; border: 1px solid #21262d; border-radius: 8px; display: block; }
+    #arc-info { margin-top: 10px; font-size: 12px; color: #8b949e; display: flex; gap: 40px; }
+    .ic h3   { color: #58a6ff; margin-bottom: 5px; font-size: 11px; letter-spacing: 1px; }
+    .ic div  { margin-bottom: 2px; }
+    .pc { color: #ffa657; } .bc { color: #79c0ff; } .xc { color: #e3b341; }
+    /* graph controls */
+    .ctrl-row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-bottom: 8px; }
+    .ctrl-row label { font-size: 11px; color: #555; margin-right: 2px; }
+    .tb-edge { font-size: 11px; padding: 4px 10px; }
+    .tb-edge.active  { opacity: 1; }
+    .tb-edge.inactive{ opacity: 0.3; }
+    #graph-meta { font-size: 11px; color: #8b949e; margin: 8px 0; display: flex; gap: 20px; flex-wrap: wrap; }
+    #graph-meta strong { color: #c9d1d9; }
+    .legend { margin-top: 10px; font-size: 11px; color: #666; display: flex; flex-wrap: wrap; gap: 14px; }
+    .leg-item { display: flex; align-items: center; gap: 5px; }
+    .leg-line { width: 22px; height: 3px; border-radius: 2px; }
+    /* Graph + sidebar layout */
+    .graph-area { display: flex; gap: 18px; align-items: flex-start; overflow-x: auto; }
+    .graph-main  { flex: 0 0 auto; }
+    .graph-side  {
+      flex: 0 0 550px; width: 550px;
+      font-size: 11px; color: #8b949e; line-height: 1.5;
+    }
+    .graph-side h3 {
+      color: #58a6ff; font-size: 10px; letter-spacing: 1.5px;
+      margin: 14px 0 6px; border-bottom: 1px solid #21262d; padding-bottom: 3px;
+    }
+    .graph-side h3:first-child { margin-top: 0; }
+    .side-entry { margin-bottom: 7px; }
+    .side-entry .side-name {
+      display: inline-block; margin-bottom: 2px; font-weight: bold;
+    }
+    .side-entry .side-desc { color: #555; }
+    .side-dot {
+      display: inline-block; width: 10px; height: 10px;
+      border-radius: 50%; margin-right: 5px; vertical-align: middle;
+      border: 1.5px solid currentColor;
+    }
+    .examples { margin-top: 12px; margin-bottom: 6px; }
+    .examples > label { font-size: 11px; color: #444; display: block; margin-bottom: 7px; }
+    .ex-btn { display: inline-block; margin: 2px 5px 2px 0; font-size: 12px; padding: 4px 10px; }
+  </style>
+</head>
+<body>
+<h1>PCB KNOT WORKBENCH</h1>
+
+<div class="input-row">
+  <input type="text" id="input" placeholder="car( bot{ )rac }tob"
+         oninput="debouncedVisualize()" autocomplete="off" spellcheck="false">
+  <button onclick="setInput('')">Clear</button>
+</div>
+<div id="status"></div>
+
+<div class="examples">
+  <label>UNLABELED — simple</label>
+  <span class="ex-btn" onclick="setInput('()')">pocket ()</span>
+  <span class="ex-btn" onclick="setInput('{()}')">cup {()}</span>
+  <span class="ex-btn" onclick="setInput('{}()')">no knot {}()</span>
+  <span class="ex-btn" onclick="setInput('({)}')">tonk ({)}</span>
+  <span class="ex-btn" onclick="setInput('{(})')">knot {(})</span>
+  <span class="ex-btn" onclick="setInput('{(}{)}')">knotted cup {(}{)}</span>
+
+  <label style="margin-top:10px">UNLABELED — complex</label>
+  <span class="ex-btn" onclick="setInput('{({(}}))')">3-cross {({(}}))  — two nested knots sharing a cup</span>
+  <span class="ex-btn" onclick="setInput('{(}{({)}})') ">2-cross chain {(}{({)}})  — sequential crossing pair</span>
+  <span class="ex-btn" onclick="setInput('{(}{(}{)}{)}')">4-cross {(}{(}{)}{)}</span>
+  <span class="ex-btn" onclick="setInput('{{(((}})))')">6-cross fan {{(((}})))  — 2×3 brace/paren grid</span>
+  <span class="ex-btn" onclick="setInput('{{{(((}}})))')">9-cross fan {{{(((}}})))  — 3×3 brace/paren grid</span>
+
+  <label style="margin-top:10px">LABELED — labels unlock same-family crossings unlabeled can't produce</label>
+  <span class="ex-btn" onclick="setInput('car( bot{ )rac }tob')">1-cross KNOT  car( bot{ )rac }tob</span>
+  <span class="ex-btn" onclick="setInput('a( b( )a )b')">1-cross POCKET  a( b( )a )b  — outer paren closes first</span>
+  <span class="ex-btn" onclick="setInput('p{ q( r{ )q }r }p')">1-cross KNOTTED_CUP  p{ q( r{ )q }r }p</span>
+  <span class="ex-btn" onclick="setInput('a{ b{ c( }a }b )c')">3-cross KNOT  a{ b{ c( }a }b )c  — same-family cups interleave</span>
+  <span class="ex-btn" onclick="setInput('a( b( c( d( )a )b )c )d')">6-cross KNOTTED_POCKET  a( b( c( d( )a )b )c )d  — 4-pocket staircase</span>
+  <span class="ex-btn" onclick="setInput('a{ b( c{ d( }a )b }c )d')">6-cross KNOT  a{ b( c{ d( }a )b }c )d  — alternating staircase</span>
+  <span class="ex-btn" onclick="setInput('a{ b( c{ d( e{ }a )b }c )d }e')">10-cross KNOTTED_CUP  a{ b( c{ d( e{ }a )b }c )d }e  — 5-staircase</span>
+  <span class="ex-btn" onclick="setInput('a{ b( c{ d( e( }a )b }c )d )e')">10-cross KNOT  a{ b( c{ d( e( }a )b }c )d )e  — 5-staircase mixed</span>
+</div>
+
+<!-- ARC DIAGRAM -->
+<h2>ARC DIAGRAM</h2>
+<canvas id="arc-canvas"></canvas>
+<div id="arc-info"></div>
+
+<!-- ANALYZER GRAPH -->
+<h2>ANALYZER GRAPH</h2>
+<div class="graph-area">
+  <div class="graph-side" id="graph-side"></div>
+  <div class="graph-main">
+    <div class="ctrl-row">
+      <label>nodes:</label>
+      <span class="tb active" id="nm-nodes"    onclick="setNodeMode('nodes')">ControlNodes</span>
+      <span class="tb"        id="nm-regions"  onclick="setNodeMode('regions')">ControlRegions</span>
+      &nbsp;
+      <label>layout:</label>
+      <span class="tb active" id="lt-force"    onclick="setLayout('force')">Force</span>
+      <span class="tb"        id="lt-circular" onclick="setLayout('circular')">Circular</span>
+      <span class="tb"        id="lt-hier"     onclick="setLayout('hier')">Hierarchical</span>
+    </div>
+    <div class="ctrl-row" id="edge-toggles">
+      <label>edges:</label>
+    </div>
+    <div id="graph-meta"></div>
+    <canvas id="graph-canvas" width="680" height="500"></canvas>
+    <div class="legend" id="graph-legend"></div>
+  </div>
+</div>
+
+<script>
+// ════════════════════════════════════════════════════
+// CONSTANTS
+// ════════════════════════════════════════════════════
+const POCKET = 'POCKET', CUP = 'CUP', OPEN = 'OPEN', CLOSE = 'CLOSE';
+const NODE_CUP_COLOR    = '#79c0ff';
+const NODE_POCKET_COLOR = '#ffa657';
+const BG = '#161b22';
+
+const EDGE_DEF = {
+  FORWARD_ADJACENCY:  { color:'#555',    dash:[4,3], label:'fwd adj',   solid:false },
+  BACKWARD_ADJACENCY: { color:'#3a3a3a', dash:[4,3], label:'bwd adj',   solid:false },
+  CONDITION_TRUE:     { color:'#3fb950', dash:[],    label:'cond true',  solid:true  },
+  CONDITION_FALSE:    { color:'#f85149', dash:[],    label:'cond false', solid:true  },
+  OWNERSHIP_JUMP:     { color:'#bc8cff', dash:[5,3], label:'ownership',  solid:false },
+  UNWIND:             { color:'#e3b341', dash:[],    label:'unwind',     solid:true  },
+  ENTRY:              { color:'#58a6ff', dash:[3,2], label:'entry',      solid:false },
+};
+
+const REGION_BG = {
+  CONDITION:'#5c3100', BODY:'#0d2a4a', SETUP:'#0d2a0d',
+  UNWIND:'#2a0d4a', POCKET_ENTRY:'#1a3a2a', CUP_ENTRY:'#1a2a3a',
+  EMPTY:'#111', AMBIGUOUS:'#1a1a1a',
+};
+const REGION_STROKE = {
+  CONDITION:'#e36209', BODY:'#1f6feb', SETUP:'#2ea043',
+  UNWIND:'#a371f7', POCKET_ENTRY:'#2ea043', CUP_ENTRY:'#388bfd',
+  EMPTY:'#333', AMBIGUOUS:'#30363d',
+};
+const REACH_ALPHA = { DEFAULT_REACHABLE:1.0, REVERSE_REACHABLE:0.5, UNREACHABLE:0.2 };
+
+// ════════════════════════════════════════════════════
+// STATE
+// ════════════════════════════════════════════════════
+let nodeMode   = 'nodes';
+let layoutMode = 'force';
+let activeEdges = new Set(['CONDITION_TRUE','CONDITION_FALSE','OWNERSHIP_JUMP','UNWIND','ENTRY']);
+let _analyzerResult = null;
+
+// ════════════════════════════════════════════════════
+// LABELED BRACKET PARSING
+// ════════════════════════════════════════════════════
+// Input format: label before open brackets, reversed-label after close brackets
+// e.g.  car( bot{ )rac }tob
+//        ↑ label   ↑ reversed-label (car reversed = rac)
+// Unlabeled brackets (empty label) fall back to stack matching within their family.
+
+function parseLabeledInput(input) {
+  const tokens = [];
+  let i = 0;
+  while (i < input.length) {
+    let textBefore = '';
+    while (i < input.length && !'(){}'.includes(input[i])) textBefore += input[i++];
+    if (i >= input.length) break;
+    const ch = input[i++];
+    const isOpen = ch === '(' || ch === '{';
+    const family = (ch === '(' || ch === ')') ? POCKET : CUP;
+    if (isOpen) {
+      const label = textBefore.replace(/\s/g,'');
+      tokens.push({ char:ch, label, displayLabel:label, family, polarity:OPEN });
+    } else {
+      let textAfter = '';
+      while (i < input.length && !'(){}'.includes(input[i]) && !/\s/.test(input[i])) textAfter += input[i++];
+      const displayLabel = textAfter.replace(/\s/g,'');
+      const label = displayLabel.split('').reverse().join('');
+      tokens.push({ char:ch, label, displayLabel, family, polarity:CLOSE });
+    }
+  }
+  return tokens;
+}
+
+// Match by (family, label). Same label → innermost-first within that group.
+function matchLabeledBrackets(tokens) {
+  const openStacks = new Map();
+  const pairs = [], matchOf = new Map();
+  for (let i = 0; i < tokens.length; i++) {
+    const tok = tokens[i];
+    const key = tok.family + ':' + tok.label;
+    if (tok.polarity === OPEN) {
+      if (!openStacks.has(key)) openStacks.set(key, []);
+      openStacks.get(key).push(i);
+    } else {
+      const stk = openStacks.get(key);
+      if (!stk || !stk.length) {
+        const d = tok.char + tok.displayLabel;
+        return { valid:false, error:`unmatched '${d}' at pos ${i}` };
+      }
+      const openIdx = stk.pop();
+      pairs.push({ openIdx, closeIdx:i, family:tok.family, label:tok.label });
+      matchOf.set(i, openIdx); matchOf.set(openIdx, i);
+    }
+  }
+  for (const [, stk] of openStacks) {
+    if (stk.length) {
+      const idx = stk[stk.length-1], tok = tokens[idx];
+      return { valid:false, error:`unmatched '${tok.displayLabel}${tok.char}' at pos ${idx}` };
+    }
+  }
+  pairs.sort((a,b)=>a.openIdx-b.openIdx);
+  return { valid:true, pairs, matchOf };
+}
+
+// ════════════════════════════════════════════════════
+// ARC DIAGRAM
+// ════════════════════════════════════════════════════
+// pairs: [{openIdx, closeIdx, family, label}]
+
+function arcCrossings(pairs){
+  const r=[];
+  for(let i=0;i<pairs.length;i++) for(let j=i+1;j<pairs.length;j++){
+    const a=pairs[i],b=pairs[j],[a0,a1,b0,b1]=[a.openIdx,a.closeIdx,b.openIdx,b.closeIdx];
+    if((a0<b0&&b0<a1&&a1<b1)||(b0<a0&&a0<b1&&b1<a1)) r.push([i,j]);
+  }
+  return r;
+}
+
+function arcClassify(pairs,crosses){
+  if(!pairs.length) return 'EMPTY';
+  if(!crosses.length) return 'NO CROSSINGS';
+  const outer=pairs.filter(p=>!pairs.some(o=>o!==p&&o.openIdx<p.openIdx&&p.closeIdx<o.closeIdx));
+  const cx=new Set(crosses.flat());
+  const outerCrossed=outer.some(p=>cx.has(pairs.indexOf(p)));
+  const n=crosses.length;
+  if(n===1) return outerCrossed?'KNOT (1 crossing, outer)':'KNOTTED CUP (1 inner crossing)';
+  return `KNOTTED — ${n} crossings`;
+}
+
+function arcLayout(n){
+  const margin=50, maxW=840;
+  const spacing=n<=1?maxW-2*margin:Math.min(80,(maxW-2*margin)/(n-1));
+  return{xs:Array.from({length:n},(_,i)=>margin+i*spacing),spacing};
+}
+
+function bezierT(x,x1,x2){
+  let lo=0,hi=1;
+  for(let k=0;k<52;k++){const m=(lo+hi)/2,t=m,xm=x1*(1-t)*(1-t)*(1+2*t)+x2*t*t*(3-2*t);if(xm<x)lo=m;else hi=m;}
+  return(lo+hi)/2;
+}
+
+function arcCrossPoint(pa,pb,ha,hb,xs){
+  const[a,b,hA,hB]=pa.openIdx<pb.openIdx?[pa,pb,ha,hb]:[pb,pa,hb,ha];
+  const[x1a,x2a,x1b,x2b]=[xs[a.openIdx],xs[a.closeIdx],xs[b.openIdx],xs[b.closeIdx]];
+  let lo=xs[b.openIdx],hi=xs[a.closeIdx],cx=0,cy=0;
+  for(let k=0;k<60;k++){
+    const xm=(lo+hi)/2;
+    const yA=3*bezierT(xm,x1a,x2a)*(1-bezierT(xm,x1a,x2a))*hA;
+    const yB=3*bezierT(xm,x1b,x2b)*(1-bezierT(xm,x1b,x2b))*hB;
+    cx=xm;cy=(yA+yB)/2;if(yA<yB)hi=xm;else lo=xm;
+  }
+  return{x:cx,y:cy};
+}
+
+function drawArcSection(canvas, tokens, pairs, crosses){
+  const n=tokens.length;
+  const{xs,spacing}=arcLayout(n);
+  const heights=pairs.map(p=>(p.closeIdx-p.openIdx)*spacing*0.5+24);
+  const maxH=heights.length?Math.max(...heights):50;
+  // extra vertical room when labels are present
+  const hasLabels=tokens.some(t=>t.label);
+  const BY=maxH+72, W=Math.max(xs[n-1]+70,440), H=BY+(hasLabels?100:72);
+  canvas.width=W; canvas.height=H;
+  const ctx=canvas.getContext('2d');
+  ctx.fillStyle=BG; ctx.fillRect(0,0,W,H);
+
+  // legend
+  ctx.save(); ctx.translate(16,18);
+  [{color:'#79c0ff',label:'{ } brace'},{color:'#ffa657',label:'( ) paren'},{color:'#e3b341',label:'✕ crossing',dot:true}]
+    .forEach((it,i)=>{
+      const ox=i*160;
+      if(it.dot){ctx.beginPath();ctx.arc(ox+8,0,7,0,Math.PI*2);ctx.fillStyle=it.color;ctx.fill();}
+      else{ctx.beginPath();ctx.moveTo(ox,0);ctx.lineTo(ox+16,0);ctx.strokeStyle=it.color;ctx.lineWidth=2.5;ctx.stroke();}
+      ctx.fillStyle='#8b949e';ctx.font='11px Courier New';ctx.textAlign='left';ctx.textBaseline='middle';
+      ctx.fillText(it.label,ox+22,0);
+    });
+  ctx.restore();
+
+  // arcs
+  pairs.forEach((p,i)=>{
+    const col=p.family===POCKET?'#ffa657':'#79c0ff';
+    const h=heights[i],x1=xs[p.openIdx],x2=xs[p.closeIdx];
+    ctx.beginPath();ctx.moveTo(x1,BY);ctx.bezierCurveTo(x1,BY-h,x2,BY-h,x2,BY);
+    ctx.strokeStyle=col;ctx.lineWidth=2.5;ctx.globalAlpha=.88;ctx.stroke();ctx.globalAlpha=1;
+  });
+
+  // crossing markers
+  crosses.forEach(([ai,bi])=>{
+    const pt=arcCrossPoint(pairs[ai],pairs[bi],heights[ai],heights[bi],xs);
+    ctx.beginPath();ctx.arc(pt.x,BY-pt.y,9,0,Math.PI*2);
+    ctx.fillStyle='#e3b341';ctx.globalAlpha=.9;ctx.fill();ctx.globalAlpha=1;
+    ctx.strokeStyle='#0d1117';ctx.lineWidth=2;ctx.stroke();
+    ctx.fillStyle='#0d1117';ctx.font='bold 11px Courier New';
+    ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('✕',pt.x,BY-pt.y);
+  });
+
+  // baseline + nodes
+  ctx.beginPath();ctx.moveTo(xs[0]-20,BY);ctx.lineTo(xs[n-1]+20,BY);
+  ctx.strokeStyle='#30363d';ctx.lineWidth=1.5;ctx.stroke();
+  tokens.forEach((tok,i)=>{
+    const x=xs[i];
+    const pair=pairs.find(p=>p.openIdx===i||p.closeIdx===i);
+    const col=pair?(pair.family===POCKET?'#ffa657':'#79c0ff'):'#c9d1d9';
+    ctx.beginPath();ctx.arc(x,BY,5,0,Math.PI*2);ctx.fillStyle=col;ctx.fill();
+    ctx.fillStyle=col;ctx.font='bold 17px Courier New';ctx.textAlign='center';ctx.textBaseline='top';
+    ctx.fillText(tok.char,x,BY+10);
+    ctx.fillStyle='#444';ctx.font='10px Courier New';ctx.fillText(i,x,BY+30);
+    if(tok.label){
+      ctx.fillStyle='#557799';ctx.font='10px Courier New';ctx.textBaseline='top';
+      const disp=tok.polarity===OPEN?tok.displayLabel+'·':'·'+tok.displayLabel;
+      ctx.fillText(disp,x,BY+44);
+    }
+  });
+}
+
+function drawArcInvalid(canvas, tokens){
+  const n=Math.max(tokens.length,1);
+  const{xs}=arcLayout(n);
+  const W=Math.max(xs[n-1]+70,300); canvas.width=W; canvas.height=130;
+  const ctx=canvas.getContext('2d');
+  ctx.fillStyle=BG;ctx.fillRect(0,0,W,130);
+  const BY=65;
+  ctx.beginPath();ctx.moveTo(xs[0]-20,BY);ctx.lineTo(xs[n-1]+20,BY);
+  ctx.strokeStyle='#30363d';ctx.lineWidth=1.5;ctx.stroke();
+  tokens.forEach((tok,i)=>{
+    const x=xs[i];
+    ctx.beginPath();ctx.arc(x,BY,5,0,Math.PI*2);ctx.fillStyle='#f85149';ctx.fill();
+    ctx.fillStyle='#f85149';ctx.font='bold 17px Courier New';ctx.textAlign='center';ctx.textBaseline='top';ctx.fillText(tok.char,x,BY+10);
+    ctx.fillStyle='#444';ctx.font='10px Courier New';ctx.fillText(i,x,BY+30);
+  });
+}
+
+// ════════════════════════════════════════════════════
+// KNOTANALYZER PORT
+// ════════════════════════════════════════════════════
+// tokens:  [{char, label, displayLabel, family, polarity}]
+// pairs:   [{openIdx, closeIdx, family, label}]   (integers)
+// matchOf: Map<tokenIdx, tokenIdx>
+function analyzeKnot(tokens, pairs, matchOf){
+  if(!tokens.length) return null;
+
+  const nodes=tokens.map((tok,i)=>({
+    index:i, char:tok.char, label:tok.label,
+    displayLabel:tok.displayLabel, family:tok.family, polarity:tok.polarity,
+  }));
+
+  const crossings=[];
+  for(let i=0;i<pairs.length;i++) for(let j=i+1;j<pairs.length;j++){
+    const a=pairs[i],b=pairs[j],[a0,a1,b0,b1]=[a.openIdx,a.closeIdx,b.openIdx,b.closeIdx];
+    if((a0<b0&&b0<a1&&a1<b1)||(b0<a0&&a0<b1&&b1<a1)) crossings.push({a:pairs[i],b:pairs[j]});
+  }
+
+  const first=nodes[0],last=nodes[nodes.length-1];
+  const outerShell=first.family===last.family?(first.family===POCKET?'POCKET_SHAPED':'CUP_SHAPED'):'MIXED';
+  const topology=crossings.length?'KNOTTED':'ORDINARY';
+  let orientation='AMBIGUOUS';
+  if(outerShell==='MIXED'){
+    if(first.family===CUP&&first.polarity===OPEN&&last.family===POCKET&&last.polarity===CLOSE) orientation='FORWARD_BIASED';
+    else if(first.family===POCKET&&first.polarity===OPEN&&last.family===CUP&&last.polarity===CLOSE) orientation='BACKWARD_BIASED';
+  }
+  let runtimeKind;
+  if(outerShell==='POCKET_SHAPED') runtimeKind=topology==='KNOTTED'?'KNOTTED_POCKET':'POCKET';
+  else if(outerShell==='CUP_SHAPED') runtimeKind=topology==='KNOTTED'?'KNOTTED_CUP':'CUP';
+  else if(orientation==='FORWARD_BIASED') runtimeKind='KNOT';
+  else if(orientation==='BACKWARD_BIASED') runtimeKind='TONK';
+  else runtimeKind='AMBIGUOUS';
+
+  const regions=[];
+  for(let i=0;i<nodes.length-1;i++)
+    regions.push({left:nodes[i],right:nodes[i+1],startIdx:i,endIdx:i+1,
+      regionKind:deriveRegionKind(nodes[i],nodes[i+1]),reachabilityKind:'DEFAULT_REACHABLE'});
+
+  const edges=[];
+  const addE=(f,t,k)=>{if(f!==t)edges.push({from:f,to:t,kind:k});};
+  for(let i=0;i<nodes.length-1;i++){addE(i,i+1,'FORWARD_ADJACENCY');addE(i+1,i,'BACKWARD_ADJACENCY');}
+  for(const p of pairs){addE(p.openIdx,p.closeIdx,'OWNERSHIP_JUMP');addE(p.closeIdx,p.openIdx,'OWNERSHIP_JUMP');}
+  for(const r of regions){
+    if(r.regionKind!=='CONDITION') continue;
+    const L=r.left,R=r.right;
+    if(L.polarity===OPEN){const ft=matchOf.get(L.index);if(ft!=null){addE(L.index,R.index,'CONDITION_TRUE');addE(L.index,ft,'CONDITION_FALSE');}}
+    if(R.polarity===CLOSE){const ft=matchOf.get(R.index);if(ft!=null){addE(R.index,L.index,'CONDITION_TRUE');addE(R.index,ft,'CONDITION_FALSE');}}
+  }
+  for(const node of nodes){
+    const enc=innermostEnclosing(node.index,pairs);
+    if(!enc) continue;
+    addE(node.index,enc.closeIdx,'UNWIND');
+    addE(node.index,enc.openIdx,'UNWIND');
+  }
+  for(const node of nodes){
+    const idx=node.index;
+    let fwd=null,fwdSpan=Infinity;
+    for(const p of pairs){if(p.openIdx>idx){const sp=p.closeIdx-p.openIdx;if(sp<fwdSpan||(sp===fwdSpan&&p.openIdx<(fwd?.openIdx??Infinity))){fwdSpan=sp;fwd=p;}}}
+    if(fwd) addE(idx,fwd.openIdx,'ENTRY');
+    let bwd=null,bwdSpan=Infinity;
+    for(const p of pairs){if(p.closeIdx<idx){const sp=p.closeIdx-p.openIdx;if(sp<bwdSpan||(sp===bwdSpan&&p.closeIdx>(bwd?.closeIdx??-Infinity))){bwdSpan=sp;bwd=p;}}}
+    if(bwd) addE(idx,bwd.closeIdx,'ENTRY');
+  }
+
+  const outMap=new Map();
+  for(const e of edges){if(!outMap.has(e.from))outMap.set(e.from,[]);outMap.get(e.from).push(e);}
+  const bfs=start=>{const v=new Set([start]),q=[start];while(q.length){const c=q.shift();for(const e of(outMap.get(c)??[]))if(!v.has(e.to)){v.add(e.to);q.push(e.to);}}return v;};
+  const primaryIdx=runtimeKind==='TONK'?nodes.length-1:0;
+  const secondaryIdx=runtimeKind==='TONK'?0:nodes.length-1;
+  const primary=bfs(primaryIdx),secondary=bfs(secondaryIdx);
+  for(const r of regions){
+    const inP=primary.has(r.left.index)&&primary.has(r.right.index);
+    const inS=secondary.has(r.left.index)&&secondary.has(r.right.index);
+    r.reachabilityKind=inP?'DEFAULT_REACHABLE':inS?'REVERSE_REACHABLE':'UNREACHABLE';
+  }
+
+  return{nodes,pairs,crossings,regions,edges,runtimeKind,topology,outerShell,orientation,matchOf};
+}
+
+function deriveRegionKind(L,R){
+  const lf=L.family,rf=R.family,lp=L.polarity,rp=R.polarity;
+  if(lf===rf){if(lp===OPEN&&rp===OPEN)return'POCKET_ENTRY';if(lp===CLOSE&&rp===CLOSE)return'UNWIND';}
+  if(lf===CUP&&lp===OPEN&&rf===POCKET&&rp===OPEN) return'SETUP';
+  if(lf===POCKET&&lp===CLOSE&&rf===CUP&&rp===CLOSE) return'SETUP';
+  if(lf===POCKET&&lp===OPEN&&rf===CUP&&rp===CLOSE) return'CONDITION';
+  if(lf===CUP&&lp===OPEN&&rf===POCKET&&rp===CLOSE) return'CONDITION';
+  if(lf===CUP&&lp===CLOSE&&rf===CUP&&rp===OPEN) return'BODY';
+  if(lf===POCKET&&lp===OPEN&&rf===CUP&&rp===OPEN) return'BODY';
+  if(lf===CUP&&lp===CLOSE&&rf===POCKET&&rp===CLOSE) return'BODY';
+  return'AMBIGUOUS';
+}
+
+function innermostEnclosing(idx,pairs){
+  let best=null,bestSpan=Infinity;
+  for(const p of pairs){const lo=p.openIdx,hi=p.closeIdx;if(lo<idx&&idx<hi){const sp=hi-lo;if(sp<bestSpan){bestSpan=sp;best=p;}}}
+  return best;
+}
+
+function nestingDepth(idx,pairs){
+  return pairs.filter(p=>p.openIdx<idx&&idx<p.closeIdx).length;
+}
+
+function regionNestingDepth(startIdx,endIdx,pairs){
+  return pairs.filter(p=>p.openIdx<=startIdx&&endIdx<=p.closeIdx).length;
+}
+
+// ════════════════════════════════════════════════════
+// DISPLAY GRAPH BUILDER
+// ════════════════════════════════════════════════════
+function buildDisplayGraph(result){
+  const gnodes=[],gedges=[];
+  const idxOf=id=>gnodes.findIndex(n=>n.id===id);
+
+  if(nodeMode==='nodes'){
+    result.nodes.forEach(n=>{
+      // For labeled nodes, show label·index as sublabel; unlabeled shows just index
+      const sublabel = n.label ? (n.displayLabel||n.label)+'·'+n.index : String(n.index);
+      gnodes.push({
+        id:'cn'+n.index, type:'control', data:n,
+        label:n.char, sublabel,
+        r: n.label ? 22 : 18,
+        fill:n.polarity===OPEN?(n.family===CUP?'#79c0ff22':'#ffa65722'):'#0d1117',
+        stroke:n.family===CUP?NODE_CUP_COLOR:NODE_POCKET_COLOR,
+        textCol:n.family===CUP?NODE_CUP_COLOR:NODE_POCKET_COLOR,
+        alpha:1, x:0, y:0,
+      });
+    });
+  }
+
+  if(nodeMode==='regions'){
+    result.regions.forEach((r,i)=>{
+      const bg=REGION_BG[r.regionKind]??'#111';
+      const stroke=REGION_STROKE[r.regionKind]??'#30363d';
+      const alpha=REACH_ALPHA[r.reachabilityKind]??0.5;
+      const abbr={CONDITION:'COND',BODY:'BODY',SETUP:'SETP',UNWIND:'UNWND',
+                  POCKET_ENTRY:'P-ENT',CUP_ENTRY:'C-ENT',EMPTY:'EMTY',AMBIGUOUS:'AMBG'}[r.regionKind]??r.regionKind.slice(0,4);
+      gnodes.push({
+        id:'reg'+i, type:'region', data:r,
+        label:abbr, sublabel:r.reachabilityKind.slice(0,3),
+        r:17,
+        fill:bg, stroke, textCol:'#c9d1d9',
+        alpha, x:0, y:0,
+      });
+    });
+  }
+
+  // TraversalEdges between ControlNodes
+  if(nodeMode==='nodes'){
+    for(const e of result.edges){
+      if(!activeEdges.has(e.kind)) continue;
+      const fi=idxOf('cn'+e.from),ti=idxOf('cn'+e.to);
+      if(fi<0||ti<0) continue;
+      gedges.push({fi,ti,kind:e.kind,color:EDGE_DEF[e.kind].color,dash:EDGE_DEF[e.kind].dash});
+    }
+  }
+
+  // Region→region edges (regions-only)
+  if(nodeMode==='regions'){
+    const nReg=result.regions.length;
+
+    // Sequential adjacency — gated on the respective toggles so they don't
+    // duplicate edges when active in the semantic loop below.
+    if(activeEdges.has('FORWARD_ADJACENCY')){
+      result.regions.forEach((_,i)=>{
+        if(i<nReg-1){
+          const fi=idxOf('reg'+i),ti=idxOf('reg'+(i+1));
+          if(fi>=0&&ti>=0)
+            gedges.push({fi,ti,kind:'FORWARD_ADJACENCY',
+              color:EDGE_DEF.FORWARD_ADJACENCY.color,dash:EDGE_DEF.FORWARD_ADJACENCY.dash});
+        }
+      });
+    }
+    if(activeEdges.has('BACKWARD_ADJACENCY')){
+      result.regions.forEach((_,i)=>{
+        if(i<nReg-1){
+          const fi=idxOf('reg'+(i+1)),ti=idxOf('reg'+i);
+          if(fi>=0&&ti>=0)
+            gedges.push({fi,ti,kind:'BACKWARD_ADJACENCY',
+              color:EDGE_DEF.BACKWARD_ADJACENCY.color,dash:EDGE_DEF.BACKWARD_ADJACENCY.dash});
+        }
+      });
+    }
+
+    // Semantic edges: node-level edge A→B maps to region[A]→region[B].
+    // Skip FORWARD/BACKWARD_ADJACENCY here — sequential region order is handled above.
+    for(const e of result.edges){
+      if(e.kind==='FORWARD_ADJACENCY'||e.kind==='BACKWARD_ADJACENCY') continue;
+      if(!activeEdges.has(e.kind)) continue;
+      const fromReg = e.from < nReg ? e.from : e.from - 1;
+      const toReg   = e.to   < nReg ? e.to   : e.to   - 1;
+      if(fromReg === toReg) continue;
+      const fi=idxOf('reg'+fromReg), ti=idxOf('reg'+toReg);
+      if(fi>=0&&ti>=0)
+        gedges.push({fi,ti,kind:e.kind,color:EDGE_DEF[e.kind].color,dash:EDGE_DEF[e.kind].dash});
+    }
+  }
+
+  return{gnodes,gedges};
+}
+
+// ════════════════════════════════════════════════════
+// LAYOUTS
+// ════════════════════════════════════════════════════
+function applyCircularLayout(gnodes,W,H){
+  const cx=W/2,cy=H/2,r=Math.min(W,H)/2-60;
+  gnodes.forEach((n,i)=>{
+    const a=(i/gnodes.length)*Math.PI*2-Math.PI/2;
+    n.x=cx+r*Math.cos(a); n.y=cy+r*Math.sin(a);
+  });
+}
+
+function applyForceLayout(gnodes,gedges,W,H){
+  // Seed from circular for determinism
+  applyCircularLayout(gnodes,W,H);
+  const n=gnodes.length; if(n<=1) return;
+  const k=Math.sqrt((W-80)*(H-80)/n)*1.4;
+  const vx=new Array(n).fill(0), vy=new Array(n).fill(0);
+  for(let iter=0;iter<350;iter++){
+    const cool=Math.pow(1-iter/350,1.8)*12+0.4;
+    // Repulsion
+    for(let i=0;i<n;i++) for(let j=i+1;j<n;j++){
+      const dx=gnodes[i].x-gnodes[j].x, dy=gnodes[i].y-gnodes[j].y;
+      const d=Math.max(Math.sqrt(dx*dx+dy*dy),0.5), f=k*k/d;
+      vx[i]+=f*dx/d; vy[i]+=f*dy/d; vx[j]-=f*dx/d; vy[j]-=f*dy/d;
+    }
+    // Attraction (deduplicated edge set)
+    const seen=new Set();
+    for(const e of gedges){
+      const key=Math.min(e.fi,e.ti)*10000+Math.max(e.fi,e.ti);
+      if(seen.has(key)) continue; seen.add(key);
+      const a=gnodes[e.fi],b=gnodes[e.ti];
+      const dx=a.x-b.x,dy=a.y-b.y,d=Math.max(Math.sqrt(dx*dx+dy*dy),0.5),f=d*d/k;
+      vx[e.fi]-=f*dx/d; vy[e.fi]-=f*dy/d; vx[e.ti]+=f*dx/d; vy[e.ti]+=f*dy/d;
+    }
+    // Apply + clamp
+    for(let i=0;i<n;i++){
+      const d=Math.sqrt(vx[i]*vx[i]+vy[i]*vy[i]);
+      if(d>cool){vx[i]*=cool/d;vy[i]*=cool/d;}
+      gnodes[i].x=Math.max(40,Math.min(W-40,gnodes[i].x+vx[i]));
+      gnodes[i].y=Math.max(40,Math.min(H-40,gnodes[i].y+vy[i]));
+      vx[i]*=0.82; vy[i]*=0.82;
+    }
+  }
+}
+
+function applyHierarchicalLayout(gnodes,result,W,H){
+  // Depth = number of pairs that enclose this node (outer=0 → top, deeper → lower)
+  const PAD=55;
+  const nodeDepths=new Map(); // id → depth
+  if(nodeMode==='nodes'||nodeMode==='all'){
+    result.nodes.forEach(n=>{
+      nodeDepths.set('cn'+n.index, nestingDepth(n.index,result.pairs));
+    });
+  }
+  if(nodeMode==='regions'||nodeMode==='all'){
+    result.regions.forEach((r,i)=>{
+      nodeDepths.set('reg'+i, regionNestingDepth(r.startIdx,r.endIdx,result.pairs));
+    });
+  }
+
+  const maxDepth=Math.max(...nodeDepths.values(),0);
+  // Group gnodes by depth
+  const byDepth=new Map();
+  gnodes.forEach(gn=>{
+    const d=nodeDepths.get(gn.id)??0;
+    if(!byDepth.has(d)) byDepth.set(d,[]);
+    byDepth.get(d).push(gn);
+  });
+
+  // Sort each depth group by original index
+  byDepth.forEach(group=>{
+    group.sort((a,b)=>{
+      const ai=a.type==='control'?a.data.index:a.data.startIdx;
+      const bi=b.type==='control'?b.data.index:b.data.startIdx;
+      return ai-bi;
+    });
+  });
+
+  const totalDepths=maxDepth+1;
+  byDepth.forEach((group,depth)=>{
+    const yFrac=totalDepths>1?depth/(totalDepths-1):0.5;
+    const y=PAD+yFrac*(H-2*PAD);
+    group.forEach((gn,i)=>{
+      const xFrac=group.length>1?i/(group.length-1):0.5;
+      gn.x=PAD+xFrac*(W-2*PAD);
+      gn.y=y;
+    });
+  });
+}
+
+// ════════════════════════════════════════════════════
+// GRAPH RENDERER
+// ════════════════════════════════════════════════════
+
+// Returns the perpendicular offset (left=positive, right=negative) needed to
+// route the edge from src→dst around any intermediate nodes.
+// Uses the quadratic Bezier amplification curve: perp at t = offset*(1+3t-3t²),
+// max 1.75× at t=0.5, so offset = needed_clearance / amplification_at_t.
+function computeAvoidOffset(src, dst, gnodes, fi, ti) {
+  const dx=dst.x-src.x, dy=dst.y-src.y;
+  const d=Math.sqrt(dx*dx+dy*dy);
+  if(d<1) return 0;
+  const nx=dx/d, ny=dy/d;
+  const MARGIN=14;
+  let leftNeeded=0, rightNeeded=0;
+
+  for(let i=0;i<gnodes.length;i++){
+    if(i===fi||i===ti) continue;
+    const n=gnodes[i];
+    const vx=n.x-src.x, vy=n.y-src.y;
+    const along=vx*nx+vy*ny;
+    if(along<=n.r||along>=d-n.r) continue; // not between src and dst
+    const perp=-ny*vx+nx*vy; // left perpendicular distance (negative = right of edge)
+    const needed=n.r+MARGIN;
+    if(Math.abs(perp)>=needed) continue; // outside the collision tube
+
+    const t=along/d;
+    const factor=Math.max(0.6, 1+3*t-3*t*t); // Bezier amplification, min 0.6
+    leftNeeded =Math.max(leftNeeded,  (perp+needed)/factor);
+    rightNeeded=Math.max(rightNeeded, (-perp+needed)/factor);
+  }
+
+  if(!leftNeeded && !rightNeeded) return 0;
+  // Route on whichever side requires less total offset
+  const chosen = leftNeeded<=rightNeeded ? leftNeeded : -rightNeeded;
+  // Clamp to prevent extreme curves
+  return Math.max(-120, Math.min(120, chosen));
+}
+
+function drawGraphCanvas(canvas,gnodes,gedges){
+  const ctx=canvas.getContext('2d');
+  const W=canvas.width,H=canvas.height;
+  ctx.fillStyle=BG; ctx.fillRect(0,0,W,H);
+  if(!gnodes.length) return;
+
+  // Pass 1: collapse same-kind bidirectional pairs (A→B + B→A) into one bidir edge.
+  // Different kinds (e.g. FORWARD_ADJACENCY vs BACKWARD_ADJACENCY) stay separate.
+  const bidirKey=(fi,ti,k)=>`${Math.min(fi,ti)}_${Math.max(fi,ti)}_${k}`;
+  const seenBidir=new Map();
+  const collapsed=[];
+  for(const e of gedges){
+    const k=bidirKey(e.fi,e.ti,e.kind);
+    if(seenBidir.has(k)){ seenBidir.get(k).bidir=true; }
+    else{ const ce={...e,bidir:false}; seenBidir.set(k,ce); collapsed.push(ce); }
+  }
+
+  // Pass 2: group collapsed edges by undirected node pair for slot-based spread.
+  const pairKey=(fi,ti)=>`${Math.min(fi,ti)}_${Math.max(fi,ti)}`;
+  const byPair=new Map();
+  for(const e of collapsed){
+    const k=pairKey(e.fi,e.ti);
+    if(!byPair.has(k)) byPair.set(k,[]);
+    byPair.get(k).push(e);
+  }
+
+  // Draw edges: combine slot offset (visual separation) + avoidance offset (node routing)
+  for(const e of collapsed){
+    const src=gnodes[e.fi],dst=gnodes[e.ti];
+    if(!src||!dst) continue;
+    const slot=byPair.get(pairKey(e.fi,e.ti));
+    const slotIdx=slot.indexOf(e), slotTotal=slot.length;
+    const rawSlot=(slotIdx-(slotTotal-1)/2)*16;
+    // Edges going fi>ti have a flipped perpendicular direction vs fi<ti edges in the same
+    // slot group. Negate the slot component for reverse edges so opposite-direction pairs
+    // (e.g. UNWIND A→B + ENTRY B→A) spread to genuinely opposite physical sides.
+    const slotOffset = e.fi < e.ti ? rawSlot : -rawSlot;
+    const avoidOffset=computeAvoidOffset(src,dst,gnodes,e.fi,e.ti);
+    const offset=slotOffset+avoidOffset;
+    drawArrow(ctx,src,dst,e.color,e.dash,offset,e.bidir);
+  }
+
+  gnodes.forEach(gn=>drawGNode(ctx,gn));
+}
+
+function drawArrow(ctx,src,dst,color,dash,offset,bidir){
+  const dx=dst.x-src.x, dy=dst.y-src.y;
+  const d=Math.sqrt(dx*dx+dy*dy); if(d<1) return;
+  const nx=dx/d, ny=dy/d;
+  const ox=-ny*offset, oy=nx*offset; // perpendicular shift
+
+  // Entry/exit points on node boundaries, shifted perpendicularly
+  const ex=src.x+nx*src.r+ox, ey=src.y+ny*src.r+oy;
+  const tx=dst.x-nx*dst.r+ox, ty=dst.y-ny*dst.r+oy;
+
+  ctx.save();
+  ctx.strokeStyle=color; ctx.lineWidth=1.8;
+  ctx.setLineDash(dash??[]);
+  ctx.globalAlpha=0.85;
+
+  const curved=Math.abs(offset)>1;
+  let cpx,cpy;
+  ctx.beginPath();
+  if(curved){
+    cpx=(ex+tx)/2+ox*1.5; cpy=(ey+ty)/2+oy*1.5;
+    ctx.moveTo(ex,ey); ctx.quadraticCurveTo(cpx,cpy,tx,ty);
+  } else {
+    ctx.moveTo(ex,ey); ctx.lineTo(tx,ty);
+  }
+  ctx.stroke();
+
+  const AL=9, AW=0.42;
+  ctx.setLineDash([]);
+
+  // Arrowhead at dst: tangent direction at curve endpoint
+  const angDst=curved ? Math.atan2(ty-cpy,tx-cpx) : Math.atan2(ty-ey,tx-ex);
+  ctx.beginPath();
+  ctx.moveTo(tx,ty);
+  ctx.lineTo(tx-AL*Math.cos(angDst-AW), ty-AL*Math.sin(angDst-AW));
+  ctx.moveTo(tx,ty);
+  ctx.lineTo(tx-AL*Math.cos(angDst+AW), ty-AL*Math.sin(angDst+AW));
+  ctx.stroke();
+
+  // Arrowhead at src for bidirectional edges: tangent direction at curve start, reversed
+  if(bidir){
+    const angSrc=curved ? Math.atan2(ey-cpy,ex-cpx) : Math.atan2(ey-ty,ex-tx);
+    ctx.beginPath();
+    ctx.moveTo(ex,ey);
+    ctx.lineTo(ex-AL*Math.cos(angSrc-AW), ey-AL*Math.sin(angSrc-AW));
+    ctx.moveTo(ex,ey);
+    ctx.lineTo(ex-AL*Math.cos(angSrc+AW), ey-AL*Math.sin(angSrc+AW));
+    ctx.stroke();
+  }
+
+  ctx.restore();
+}
+
+function drawGNode(ctx,gn){
+  ctx.save();
+  ctx.globalAlpha=gn.alpha??1;
+  ctx.beginPath(); ctx.arc(gn.x,gn.y,gn.r,0,Math.PI*2);
+  ctx.fillStyle=gn.fill; ctx.fill();
+  ctx.strokeStyle=gn.stroke; ctx.lineWidth=2; ctx.stroke();
+  ctx.fillStyle=gn.textCol;
+  ctx.font=`bold ${gn.r>=18?14:12}px Courier New`;
+  ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillText(gn.label,gn.x,gn.y);
+  // sublabel below node
+  ctx.globalAlpha=(gn.alpha??1)*0.6;
+  ctx.fillStyle='#8b949e'; ctx.font='9px Courier New';
+  ctx.fillText(gn.sublabel,gn.x,gn.y+gn.r+9);
+  ctx.restore();
+}
+
+// ════════════════════════════════════════════════════
+// TOGGLES
+// ════════════════════════════════════════════════════
+function setNodeMode(m){
+  nodeMode=m;
+  ['nodes','regions'].forEach(x=>document.getElementById('nm-'+x).classList.toggle('active',x===m));
+  redrawGraph();
+}
+
+function setLayout(l){
+  layoutMode=l;
+  ['force','circular','hier'].forEach(x=>document.getElementById('lt-'+x).classList.toggle('active',x===l));
+  redrawGraph();
+}
+
+function buildEdgeToggles(){
+  const container=document.getElementById('edge-toggles');
+  Object.entries(EDGE_DEF).forEach(([kind,def])=>{
+    const btn=document.createElement('span');
+    btn.className='tb tb-edge'+(activeEdges.has(kind)?' active':' inactive');
+    btn.style.borderColor=def.color; btn.style.color=def.color;
+    btn.style.background=BG; btn.textContent=def.label;
+    btn.onclick=()=>{
+      activeEdges.has(kind)?activeEdges.delete(kind):activeEdges.add(kind);
+      btn.classList.toggle('active',activeEdges.has(kind));
+      btn.classList.toggle('inactive',!activeEdges.has(kind));
+      redrawGraph();
+    };
+    container.appendChild(btn);
+  });
+}
+
+function buildGraphLegend(){
+  const el=document.getElementById('graph-legend');
+
+  // Edge style key: solid vs dashed
+  const edgeStyleDiv=document.createElement('div');
+  edgeStyleDiv.style.cssText='width:100%;margin-bottom:6px;display:flex;gap:28px;align-items:center;';
+  edgeStyleDiv.innerHTML=`
+    <span style="color:#666;font-size:11px;margin-right:4px">edges:</span>
+    <span class="leg-item">
+      <svg width="32" height="10"><line x1="0" y1="5" x2="32" y2="5" stroke="#aaa" stroke-width="2"/><polygon points="32,5 24,2 24,8" fill="#aaa"/></svg>
+      <span style="color:#8b949e">solid = control flow (condition, unwind)</span>
+    </span>
+    <span class="leg-item">
+      <svg width="32" height="10"><line x1="0" y1="5" x2="32" y2="5" stroke="#aaa" stroke-width="2" stroke-dasharray="4,3"/><polygon points="32,5 24,2 24,8" fill="#aaa"/></svg>
+      <span style="color:#8b949e">dashed = structural (adjacency, entry, ownership)</span>
+    </span>`;
+  el.appendChild(edgeStyleDiv);
+
+  // Node kind key
+  const nodeItems=[
+    {label:'{} CUP OPEN',    col:NODE_CUP_COLOR,    fill:'#79c0ff22'},
+    {label:'{} CUP CLOSE',   col:NODE_CUP_COLOR,    fill:'#0d1117'},
+    {label:'() POCKET OPEN', col:NODE_POCKET_COLOR,  fill:'#ffa65722'},
+    {label:'() POCKET CLOSE',col:NODE_POCKET_COLOR,  fill:'#0d1117'},
+  ];
+  const regionItems=[
+    {label:'CONDITION',col:REGION_STROKE.CONDITION,fill:REGION_BG.CONDITION},
+    {label:'BODY',     col:REGION_STROKE.BODY,     fill:REGION_BG.BODY},
+    {label:'SETUP',    col:REGION_STROKE.SETUP,    fill:REGION_BG.SETUP},
+    {label:'UNWIND',   col:REGION_STROKE.UNWIND,   fill:REGION_BG.UNWIND},
+    {label:'AMBIGUOUS',col:REGION_STROKE.AMBIGUOUS,fill:REGION_BG.AMBIGUOUS},
+  ];
+  [...nodeItems,...regionItems].forEach(it=>{
+    const div=document.createElement('div');
+    div.className='leg-item';
+    div.innerHTML=`<svg width="16" height="16"><circle cx="8" cy="8" r="7" fill="${it.fill}" stroke="${it.col}" stroke-width="2"/></svg><span>${it.label}</span>`;
+    el.appendChild(div);
+  });
+}
+
+// ════════════════════════════════════════════════════
+// MAIN
+// ════════════════════════════════════════════════════
+const GRAPH_W=680, GRAPH_H=500;
+function clearGraphCanvas(canvas){
+  canvas.width=GRAPH_W; canvas.height=GRAPH_H;
+  const ctx=canvas.getContext('2d'); ctx.fillStyle=BG; ctx.fillRect(0,0,GRAPH_W,GRAPH_H);
+}
+
+let _debounceTimer=null;
+function debouncedVisualize(){ clearTimeout(_debounceTimer); _debounceTimer=setTimeout(visualize,120); }
+
+function setInput(s){ document.getElementById('input').value=s; visualize(); }
+
+function redrawGraph(){
+  if(!_analyzerResult) return;
+  const canvas=document.getElementById('graph-canvas');
+  canvas.width=GRAPH_W; canvas.height=GRAPH_H;
+  const{gnodes,gedges}=buildDisplayGraph(_analyzerResult);
+  const W=canvas.width, H=canvas.height;
+  if(layoutMode==='circular') applyCircularLayout(gnodes,W,H);
+  else if(layoutMode==='force') applyForceLayout(gnodes,gedges,W,H);
+  else applyHierarchicalLayout(gnodes,_analyzerResult,W,H);
+  drawGraphCanvas(canvas,gnodes,gedges);
+}
+
+function visualize(){
+  const raw=document.getElementById('input').value;
+  const statusEl=document.getElementById('status');
+  const infoEl=document.getElementById('arc-info');
+  const metaEl=document.getElementById('graph-meta');
+  const arcCanvas=document.getElementById('arc-canvas');
+  const graphCanvas=document.getElementById('graph-canvas');
+
+  const tokens=parseLabeledInput(raw);
+
+  if(!tokens.length){
+    statusEl.innerHTML=''; infoEl.innerHTML=''; metaEl.innerHTML='';
+    _analyzerResult=null;
+    arcCanvas.width=500; arcCanvas.height=120;
+    const actx0=arcCanvas.getContext('2d'); actx0.fillStyle=BG; actx0.fillRect(0,0,500,120);
+    clearGraphCanvas(graphCanvas);
+    return;
+  }
+
+  const matched=matchLabeledBrackets(tokens);
+  if(!matched.valid){
+    statusEl.innerHTML=`<span class="invalid">✗ INVALID</span> — ${matched.error}`;
+    infoEl.innerHTML=''; metaEl.innerHTML=''; _analyzerResult=null;
+    drawArcInvalid(arcCanvas,tokens);
+    clearGraphCanvas(graphCanvas);
+    return;
+  }
+
+  const{pairs,matchOf}=matched;
+  const crosses=arcCrossings(pairs);
+  const arcTopo=arcClassify(pairs,crosses);
+  statusEl.innerHTML=`<span class="valid">✓ VALID</span> &nbsp;│&nbsp; ${arcTopo}`;
+  drawArcSection(arcCanvas,tokens,pairs,crosses);
+
+  const pairLines=pairs.map((p,i)=>{
+    const cls=p.family===POCKET?'pc':'bc';
+    const to=tokens[p.openIdx], tc=tokens[p.closeIdx];
+    const dispO=(to.displayLabel?to.displayLabel:'') + to.char;
+    const dispC=tc.char + (tc.displayLabel?tc.displayLabel:'');
+    const lbl=p.label?` <span style="color:#557799">"${p.label}"</span>`:'';
+    return`<div class="${cls}">[${p.openIdx}]${dispO}↔${dispC}[${p.closeIdx}]${lbl}</div>`;
+  }).join('');
+  const crossLines=crosses.length
+    ?crosses.map(([a,b])=>`<div class="xc">pair ${a} × pair ${b}</div>`).join('')
+    :'<div style="color:#333">none</div>';
+  infoEl.innerHTML=`<div class="ic"><h3>PAIRS (${pairs.length})</h3>${pairLines}</div><div class="ic"><h3>CROSSINGS (${crosses.length})</h3>${crossLines}</div>`;
+
+  // Analyzer graph
+  const result=analyzeKnot(tokens,pairs,matchOf);
+  _analyzerResult=result;
+  if(!result){ metaEl.innerHTML='<span style="color:#f85149">analysis failed</span>'; return; }
+
+  metaEl.innerHTML=`
+    <span><strong>runtimeKind</strong> ${result.runtimeKind}</span>
+    <span><strong>topology</strong> ${result.topology}</span>
+    <span><strong>shell</strong> ${result.outerShell}</span>
+    <span><strong>orient</strong> ${result.orientation}</span>
+    <span><strong>nodes</strong> ${result.nodes.length}</span>
+    <span><strong>pairs</strong> ${result.pairs.length}</span>
+    <span><strong>regions</strong> ${result.regions.length}</span>
+    <span><strong>edges</strong> ${result.edges.length}</span>`;
+
+  redrawGraph();
+}
+
+function buildGraphSide(){
+  const el=document.getElementById('graph-side');
+
+  el.innerHTML=`
+<h3>CONTROL NODES</h3>
+<p style="margin-bottom:8px;color:#555">
+  Each <strong style="color:#c9d1d9">ControlNode</strong> is a single bracket token — an open
+  <code style="color:#ffa657">(</code>/<code style="color:#79c0ff">{</code> or a close
+  <code style="color:#ffa657">)</code>/<code style="color:#79c0ff">}</code>. Nodes are the
+  decision and transition points of execution. Regions are the spans <em>between</em> nodes.
+</p>
+<div class="side-entry">
+  <span class="side-dot" style="color:#ffa657;background:#ffa65722"></span>
+  <span class="side-name" style="color:#ffa657">POCKET OPEN &nbsp;<code>(</code></span><br>
+  <span class="side-desc">Starts a pocket scope. The forward interpreter enters here; becomes a condition test in KNOT contexts.</span>
+</div>
+<div class="side-entry">
+  <span class="side-dot" style="color:#ffa657;background:#0d1117"></span>
+  <span class="side-name" style="color:#ffa657">POCKET CLOSE <code>)</code></span><br>
+  <span class="side-desc">Closes the pocket scope. The backward interpreter enters here; mirrors the OPEN in a TONK.</span>
+</div>
+<div class="side-entry">
+  <span class="side-dot" style="color:#79c0ff;background:#79c0ff22"></span>
+  <span class="side-name" style="color:#79c0ff">CUP OPEN &nbsp;&nbsp;&nbsp;&nbsp;<code>{</code></span><br>
+  <span class="side-desc">Starts a cup scope. Provides bidirectional ownership over the pocket nested inside it.</span>
+</div>
+<div class="side-entry">
+  <span class="side-dot" style="color:#79c0ff;background:#0d1117"></span>
+  <span class="side-name" style="color:#79c0ff">CUP CLOSE &nbsp;&nbsp;<code>}</code></span><br>
+  <span class="side-desc">Closes the cup scope. In KNOT contexts the backward condition test lives here.</span>
+</div>
+
+<h3>CONTROL REGIONS</h3>
+<p style="margin-bottom:8px;color:#555">
+  A <strong style="color:#c9d1d9">ControlRegion</strong> is the span between two adjacent
+  bracket nodes. Its <em>kind</em> is determined entirely by the families and polarities of
+  its left and right boundary nodes.
+</p>
+<div class="side-entry">
+  <span class="side-dot" style="color:${REGION_STROKE.CONDITION};background:${REGION_BG.CONDITION}"></span>
+  <span class="side-name" style="color:${REGION_STROKE.CONDITION}">CONDITION</span><br>
+  <span class="side-desc">Mixed boundary (one paren, one brace). The runtime evaluates a boolean test here. The OPEN boundary emits a forward condition edge; the CLOSE boundary emits a backward condition edge.</span>
+</div>
+<div class="side-entry">
+  <span class="side-dot" style="color:${REGION_STROKE.BODY};background:${REGION_BG.BODY}"></span>
+  <span class="side-name" style="color:${REGION_STROKE.BODY}">BODY</span><br>
+  <span class="side-desc">Between a cup close and any open, or between two opens of different families. The main execution content of a loop or knot arm.</span>
+</div>
+<div class="side-entry">
+  <span class="side-dot" style="color:${REGION_STROKE.SETUP};background:${REGION_BG.SETUP}"></span>
+  <span class="side-name" style="color:${REGION_STROKE.SETUP}">SETUP</span><br>
+  <span class="side-desc">Cup open ↔ pocket open, or pocket close ↔ cup close. Initialization code that runs once before the pocket scope begins (or after it ends, in the backward direction).</span>
+</div>
+<div class="side-entry">
+  <span class="side-dot" style="color:${REGION_STROKE.UNWIND};background:${REGION_BG.UNWIND}"></span>
+  <span class="side-name" style="color:${REGION_STROKE.UNWIND}">UNWIND</span><br>
+  <span class="side-desc">Between two closes of the same family. Cleanup code that runs when unwinding out of a scope after all iterations are done.</span>
+</div>
+<div class="side-entry">
+  <span class="side-dot" style="color:${REGION_STROKE.AMBIGUOUS};background:${REGION_BG.AMBIGUOUS}"></span>
+  <span class="side-name" style="color:${REGION_STROKE.AMBIGUOUS}">AMBIGUOUS</span><br>
+  <span class="side-desc">Boundary combination not covered by the above rules — seen in fragments or during partial input. No semantic guarantees.</span>
+</div>
+
+<h3>EDGE TYPES</h3>
+<div class="side-entry">
+  <span class="side-name" style="color:#3fb950">▶ CONDITION TRUE</span> <em style="color:#444">(solid green)</em><br>
+  <span class="side-desc">Taken when the condition evaluates to true. Goes from the condition node into the body of the branch.</span>
+</div>
+<div class="side-entry">
+  <span class="side-name" style="color:#f85149">▶ CONDITION FALSE</span> <em style="color:#444">(solid red)</em><br>
+  <span class="side-desc">Taken when the condition evaluates to false. Skips over the body to the exit point, causing the scope to close.</span>
+</div>
+<div class="side-entry">
+  <span class="side-name" style="color:#e3b341">▶ UNWIND</span> <em style="color:#444">(solid amber)</em><br>
+  <span class="side-desc">Escape path from any node to the close of its innermost enclosing pair. Taken when the runtime needs to exit the current scope abnormally (stack underflow, early exit).</span>
+</div>
+<div class="side-entry">
+  <span class="side-name" style="color:#58a6ff">▶ ENTRY</span> <em style="color:#444">(dashed blue)</em><br>
+  <span class="side-desc">Points from any node to the open of the nearest pair ahead (forward entry) or the close of the nearest pair behind (backward entry). Marks legal jump-in points for the interpreter.</span>
+</div>
+<div class="side-entry">
+  <span class="side-name" style="color:#bc8cff">▶ OWNERSHIP</span> <em style="color:#444">(dashed purple)</em><br>
+  <span class="side-desc">Connects an open node to its matched close (and vice versa). Encodes the structural pairing — the cup or pocket that owns this span.</span>
+</div>
+<div class="side-entry">
+  <span class="side-name" style="color:#555">▶ FWD ADJACENCY</span> <em style="color:#444">(dashed gray)</em><br>
+  <span class="side-desc">Sequential token order, left→right. The default forward-interpreter step when no condition or jump applies.</span>
+</div>
+<div class="side-entry">
+  <span class="side-name" style="color:#3a3a3a">▶ BWD ADJACENCY</span> <em style="color:#444">(dashed dark)</em><br>
+  <span class="side-desc">Sequential token order, right→left. The default backward-interpreter step.</span>
+</div>
+`;
+}
+
+buildEdgeToggles();
+buildGraphLegend();
+buildGraphSide();
+setInput('car( bot{ )rac }tob');
+</script>
+</body>
+</html>

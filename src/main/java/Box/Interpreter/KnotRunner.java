@@ -66,7 +66,8 @@ public class KnotRunner {
         priorEdge = null;
 
         while (count >= 0 && count < expression.size()) {
-            if (graph.getNodeAt(count) != null) {
+
+        	if (graph.getNodeAt(count) != null) {
                 Integer next = selectStep(count);
                 if (next != null) {
                     count = next;
@@ -113,8 +114,9 @@ public class KnotRunner {
         }
 
         // Oscillation: at true-entry of a backward condition (re-check after forward pass).
+        // Skip if this node is itself a forward condition start — let hasForwardCondition handle it.
         int bwdTrueStart = graph.backwardConditionStartForTrueEntry(index);
-        if (bwdTrueStart != -1) {
+        if (bwdTrueStart != -1 && !graph.hasForwardCondition(index)) {
             int bwdTrueIndex = graph.backwardConditionTrueTarget(bwdTrueStart);
             if (checkConditionRangeBackward(bwdTrueStart, bwdTrueIndex)) {
                 interp.setForward(false);
@@ -133,6 +135,8 @@ public class KnotRunner {
             int falseIndex = graph.forwardConditionFalseTarget(index);
             boolean met = checkConditionRange(startIndex, trueIndex);
             priorEdge = condEdge(startIndex, met ? EdgeKind.CONDITION_TRUE : EdgeKind.CONDITION_FALSE);
+
+            
             if (priorEdge != null) return priorEdge.to.expressionIndex;
             int target = met ? trueIndex : falseIndex;
             if (target >= 0) return target + 1;

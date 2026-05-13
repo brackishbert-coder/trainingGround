@@ -3406,18 +3406,15 @@ public class ParserTest {
 				}
 			}
 			// backward two-arg binary ops: nim xam dnab rob roxb tfelb thgirb + vec/mat
-			for (TokenType bwdTok : new TokenType[]{
-					TokenType.NIM, TokenType.XAM,
-					TokenType.DNAB, TokenType.ROB, TokenType.ROXB,
-					TokenType.TFELB, TokenType.THGIRB,
-					TokenType.TODV, TokenType.SSORC, TokenType.DDAV,
-					TokenType.BUSV, TokenType.ELACSV}) {
-				if (peek().type == TokenType.DOT && peekI(1).type == bwdTok) {
-					consume(TokenType.DOT, "");
-					Token tok = consume(bwdTok, "");
-					if (baseExp != null && rootExp != null)
-						return new Expr.Yranib(baseExp.expression, tok, rootExp.expression);
-				}
+			if (peek().type == TokenType.DOT && (peekI(1).type == TokenType.NIM || peekI(1).type == TokenType.XAM
+					|| peekI(1).type == TokenType.DNAB || peekI(1).type == TokenType.ROB || peekI(1).type == TokenType.ROXB
+					|| peekI(1).type == TokenType.TFELB || peekI(1).type == TokenType.THGIRB
+					|| peekI(1).type == TokenType.TODV || peekI(1).type == TokenType.SSORC || peekI(1).type == TokenType.DDAV
+					|| peekI(1).type == TokenType.BUSV || peekI(1).type == TokenType.ELACSV)) {
+				consume(TokenType.DOT, "");
+				Token tok = advance();
+				if (baseExp != null && rootExp != null)
+					return new Expr.Yranib(baseExp.expression, tok, rootExp.expression);
 			}
 		}
 
@@ -3463,28 +3460,27 @@ public class ParserTest {
 			return new Expr.Mono(value, operator);
 		}
 		// --- rounding/sign/inverse-trig/vector-scalar/string mono ops ---
-		for (TokenType fwdTok : new TokenType[]{
-				TokenType.ABS, TokenType.SQRT, TokenType.FLOOR, TokenType.CEIL,
-				TokenType.ROUND, TokenType.SIGN,
-				TokenType.ASIN, TokenType.ACOS, TokenType.ATAN,
-				TokenType.ASINH, TokenType.ACOSH, TokenType.ATANH,
-				TokenType.BNOT,
-				TokenType.NORM, TokenType.UNIT, TokenType.TRANS,
-				TokenType.VDET, TokenType.VINV, TokenType.TRACE,
-				TokenType.LEN, TokenType.UPPER, TokenType.LOWER,
-				TokenType.STRREV, TokenType.TRIM, TokenType.NUM}) {
-			if (check(fwdTok)) {
-				Token operator = consume(fwdTok, "");
-				consume(TokenType.DOT, "");
-				consume(TokenType.OPENPAREN, "");
-				Expr value = cossoc();
-				consume(TokenType.CLOSEDPAREN, "");
-				return new Expr.Mono(value, operator);
-			}
+		if (check(TokenType.ABS) || check(TokenType.SQRT) || check(TokenType.FLOOR) || check(TokenType.CEIL)
+				|| check(TokenType.ROUND) || check(TokenType.SIGN)
+				|| check(TokenType.ASIN) || check(TokenType.ACOS) || check(TokenType.ATAN)
+				|| check(TokenType.ASINH) || check(TokenType.ACOSH) || check(TokenType.ATANH)
+				|| check(TokenType.BNOT)
+				|| check(TokenType.NORM) || check(TokenType.UNIT) || check(TokenType.TRANS)
+				|| check(TokenType.VDET) || check(TokenType.VINV) || check(TokenType.TRACE)
+				|| check(TokenType.LEN) || check(TokenType.UPPER) || check(TokenType.LOWER)
+				|| check(TokenType.STRREV) || check(TokenType.TRIM) || check(TokenType.NUM)) {
+			Token operator = advance();
+			consume(TokenType.DOT, "");
+			consume(TokenType.OPENPAREN, "");
+			Expr value = cossoc();
+			consume(TokenType.CLOSEDPAREN, "");
+			return new Expr.Mono(value, operator);
 		}
 		// --- min/max two-arg binary ops ---
 		if (check(TokenType.MIN) || check(TokenType.MAX)) {
-			Token operator = check(TokenType.MIN) ? consume(TokenType.MIN, "") : consume(TokenType.MAX, "");
+			Token operator;
+			if (check(TokenType.MIN)) { operator = consume(TokenType.MIN, ""); }
+			else { operator = consume(TokenType.MAX, ""); }
 			consume(TokenType.DOT, "");
 			consume(TokenType.OPENPAREN, "");
 			Expr left = sinnis();
@@ -3519,39 +3515,34 @@ public class ParserTest {
 			return new Expr.Clamp(operator, bwdToken, value, lo, hi);
 		}
 		// --- bitwise binary ops (two-arg) ---
-		for (TokenType fwdTok : new TokenType[]{
-				TokenType.BAND, TokenType.BOR, TokenType.BXOR,
-				TokenType.BLEFT, TokenType.BRIGHT}) {
-			if (check(fwdTok)) {
-				Token operator = consume(fwdTok, "");
+		if (check(TokenType.BAND) || check(TokenType.BOR) || check(TokenType.BXOR)
+				|| check(TokenType.BLEFT) || check(TokenType.BRIGHT)) {
+			Token operator = advance();
+			consume(TokenType.DOT, "");
+			consume(TokenType.OPENPAREN, "");
+			Expr left = sinnis();
+			consume(TokenType.COMMA, "");
+			Expr right = sinnis();
+			consume(TokenType.CLOSEDPAREN, "");
+			if (check(TokenType.DOT)) {
 				consume(TokenType.DOT, "");
-				consume(TokenType.OPENPAREN, "");
-				Expr left = sinnis();
-				consume(TokenType.COMMA, "");
-				Expr right = sinnis();
-				consume(TokenType.CLOSEDPAREN, "");
-				if (check(TokenType.DOT)) {
-					consume(TokenType.DOT, "");
-					Token nekot = consume(bwdBitwiseTok(fwdTok), "");
-					return new Expr.Binaryyranib(left, operator, nekot, right);
-				}
-				return new Expr.Binary(left, operator, right);
+				TokenType bwdType = bwdBitwiseTok(operator.type);
+				Token nekot = consume(bwdType, "");
+				return new Expr.Binaryyranib(left, operator, nekot, right);
 			}
+			return new Expr.Binary(left, operator, right);
 		}
 		// --- vector/matrix binary ops (two-arg) ---
-		for (TokenType fwdTok : new TokenType[]{
-				TokenType.VDOT, TokenType.CROSS, TokenType.VADD,
-				TokenType.VSUB, TokenType.VSCALE}) {
-			if (check(fwdTok)) {
-				Token operator = consume(fwdTok, "");
-				consume(TokenType.DOT, "");
-				consume(TokenType.OPENPAREN, "");
-				Expr left = sinnis();
-				consume(TokenType.COMMA, "");
-				Expr right = sinnis();
-				consume(TokenType.CLOSEDPAREN, "");
-				return new Expr.Binary(left, operator, right);
-			}
+		if (check(TokenType.VDOT) || check(TokenType.CROSS) || check(TokenType.VADD)
+				|| check(TokenType.VSUB) || check(TokenType.VSCALE)) {
+			Token operator = advance();
+			consume(TokenType.DOT, "");
+			consume(TokenType.OPENPAREN, "");
+			Expr left = sinnis();
+			consume(TokenType.COMMA, "");
+			Expr right = sinnis();
+			consume(TokenType.CLOSEDPAREN, "");
+			return new Expr.Binary(left, operator, right);
 		}
 		Expr pocket = cossoc();
 		if (pocket instanceof Expr.Pocket) {
@@ -3585,19 +3576,17 @@ public class ParserTest {
 				}
 			}
 			// backward mono ops: sba trqs roolf liec dnuor ngis nisa soca nata hnisa hsoca hnata tonb + vec/mat
-			for (TokenType bwdTok : new TokenType[]{
-					TokenType.SBA, TokenType.TRQS, TokenType.ROOLF, TokenType.LIEC,
-					TokenType.DNUOR, TokenType.NGIS,
-					TokenType.NISA, TokenType.SOCA, TokenType.NATA,
-					TokenType.HNISA, TokenType.HSOCA, TokenType.HNATA,
-					TokenType.TONB,
-					TokenType.MRON, TokenType.TINU, TokenType.SNART,
-					TokenType.TEDV, TokenType.VNIV, TokenType.ECART}) {
-				if (peek().type == TokenType.DOT && peekI(1).type == bwdTok) {
-					consume(TokenType.DOT, "");
-					Token tok = consume(bwdTok, "");
-					if (valueExp != null) return new Expr.Onom(valueExp.expression, tok);
-				}
+			if (peek().type == TokenType.DOT && (peekI(1).type == TokenType.SBA || peekI(1).type == TokenType.TRQS
+					|| peekI(1).type == TokenType.ROOLF || peekI(1).type == TokenType.LIEC
+					|| peekI(1).type == TokenType.DNUOR || peekI(1).type == TokenType.NGIS
+					|| peekI(1).type == TokenType.NISA || peekI(1).type == TokenType.SOCA || peekI(1).type == TokenType.NATA
+					|| peekI(1).type == TokenType.HNISA || peekI(1).type == TokenType.HSOCA || peekI(1).type == TokenType.HNATA
+					|| peekI(1).type == TokenType.TONB
+					|| peekI(1).type == TokenType.MRON || peekI(1).type == TokenType.TINU || peekI(1).type == TokenType.SNART
+					|| peekI(1).type == TokenType.TEDV || peekI(1).type == TokenType.VNIV || peekI(1).type == TokenType.ECART)) {
+				consume(TokenType.DOT, "");
+				Token tok = advance();
+				if (valueExp != null) return new Expr.Onom(valueExp.expression, tok);
 			}
 		}
 
@@ -5504,6 +5493,8 @@ public class ParserTest {
 		}
 		RuntimeKind graphKind = new KnotAnalyzer(stmts).analyze().runtimeKind;
 		boolean isKnot = (graphKind == RuntimeKind.KNOT)
+				|| (graphKind == RuntimeKind.KNOTTED_CUP)
+				|| (graphKind == RuntimeKind.KNOTTED_POCKET)
 				|| (graphKind == RuntimeKind.AMBIGUOUS && first.type == TokenType.OPENBRACE);
 
 		if (isKnot) {

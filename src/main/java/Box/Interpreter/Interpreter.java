@@ -210,7 +210,7 @@ public class Interpreter extends Thread implements Declaration.Visitor<Object> {
 	public final BoxInstance     bin   = new BoxInstance(null, new java.util.ArrayList<>(), null, this);
 	public final XobInstance     gap   = new XobInstance(null, new java.util.ArrayList<>(), null, this);
 	public final CupInstance     non   = new CupInstance(null, new java.util.ArrayList<>(), null, this);
-	public final PocketInstance  trash = new PocketInstance(null, new java.util.ArrayList<>(), null, this);
+	public final BoxInstance     trash = new PocketInstance(null, new java.util.ArrayList<>(), null, this);
 	public final TkpInstance     voidC = new TkpInstance(null, new java.util.ArrayList<>(), null, this);
 	public final PucInstance     limbo = new PucInstance(null, new java.util.ArrayList<>(), null, this);
 
@@ -296,7 +296,7 @@ public class Interpreter extends Thread implements Declaration.Visitor<Object> {
 		else               { gap.body.add(value);   notifyContainerModified(gap);   }
 	}
 
-	public BoxInstance getActiveErrorSink() { return dynamicPolicy ? trash : bin; }
+	public BoxInstance getActiveErrorSink() { if (dynamicPolicy) return trash; return bin; }
 
 	public Interpreter() {
 		globals.define("BIN",    (Token) null, bin);
@@ -4663,7 +4663,13 @@ Object returnObject=null;
 				Object evaluate = null;
 				for (int i = 0; i < ((BoxInstance) right).body.size(); i++) {
 					Object at = ((BoxInstance) right).body.get(i);
-					addOrSubtractAndAssign(at, valueToAssign);
+					if (at instanceof Integer) {
+						((BoxInstance) right).body.set(i, (Integer) at + valueToAssign);
+					} else if (at instanceof Double) {
+						((BoxInstance) right).body.set(i, (Double) at + (double) valueToAssign);
+					} else {
+						addOrSubtractAndAssign(at, valueToAssign);
+					}
 					if (at instanceof Stmt.Expression) {
 						evaluate = evaluate(((Stmt.Expression) at));
 						if (evaluate != null)
@@ -5309,28 +5315,28 @@ Object returnObject=null;
 			throw new RuntimeError(expr.operator, "Operand must be a number.");
 
 		case PLUSPLUS:
-			if (!forward) {
-				if (left instanceof Double) {
+			if (left instanceof Double) {
 
-					double value = (double) left + 1.0;
-					assignValue(expr, value);
+				double value = (double) left + 1.0;
+				assignValue(expr, value);
 
-					return value;
-				}
-				if (left instanceof Integer) {
+				return value;
+			}
+			if (left instanceof Integer) {
 
-					int value = (int) left + 1;
-					assignValue(expr, value);
+				int value = (int) left + 1;
+				assignValue(expr, value);
 
-					return value;
-				}
-				if (left instanceof Bin) {
+				return value;
+			}
+			if (left instanceof Bin) {
 
-					Bin value = Bin.add((Bin) left, new Bin("1"));
-					assignValue(expr, value);
+				Bin value = Bin.add((Bin) left, new Bin("1"));
+				assignValue(expr, value);
 
-					return value;
-				}
+				return value;
+			}
+			{
 				int valueToAssign = 1;
 
 				Object pocketInstance = isPocketInstance(left, valueToAssign);
@@ -5352,28 +5358,28 @@ Object returnObject=null;
 			}
 			return left;
 		case MINUSMINUS:
-			if (!forward) {
-				if (left instanceof Double) {
+			if (left instanceof Double) {
 
-					double value = (double) left - 1.0;
-					assignValue(expr, value);
+				double value = (double) left - 1.0;
+				assignValue(expr, value);
 
-					return value;
-				}
-				if (left instanceof Integer) {
+				return value;
+			}
+			if (left instanceof Integer) {
 
-					int value = (int) left - 1;
-					assignValue(expr, value);
+				int value = (int) left - 1;
+				assignValue(expr, value);
 
-					return value;
-				}
-				if (left instanceof Bin) {
+				return value;
+			}
+			if (left instanceof Bin) {
 
-					Bin value = Bin.subtract((Bin) left, new Bin("1"));
-					assignValue(expr, value);
+				Bin value = Bin.subtract((Bin) left, new Bin("1"));
+				assignValue(expr, value);
 
-					return value;
-				}
+				return value;
+			}
+			{
 				int valueToAssign = -1;
 
 				Object pocketInstance = isPocketInstance(left, valueToAssign);
@@ -7156,32 +7162,41 @@ Object returnObject=null;
 	}
 
 	@Override
+	@SuppressWarnings("unchecked")
 	public Object visitCupExpr(Cup expr) {
 		Object name = lookUpVariable(expr.identifier, expr);
+
+		// A knotted cup has crossing condition regions and must loop via KnotRunner.
+		java.util.List<Stmt> stmts = (java.util.List<Stmt>)(java.util.List<?>)expr.expression;
+		ControlGraph cupGraph = new KnotAnalyzer(stmts).analyze();
+		boolean isKnotted = cupGraph.topology == Topology.KNOTTED;
 
 		if (name == null) {
 			buildClass(expr);
 			name = lookUpVariable(expr.identifier, expr);
 			Environment previous = environment;
 			try {
-
 				environment = new Environment(environment);
-				for (int i = 0; i < expr.expression.size(); i++) {
-					execute(expr.expression.get(i));
-
+				if (isKnotted) {
+					new KnotRunner(expr, stmts, this).runKnot();
+				} else {
+					for (int i = 0; i < expr.expression.size(); i++) {
+						execute(expr.expression.get(i));
+					}
 				}
 			} finally {
 				this.environment = previous;
 			}
 		} else {
-
 			Environment previous = environment;
 			try {
-
 				environment = new Environment(environment);
-				for (int i = 0; i < expr.expression.size(); i++) {
-					execute(expr.expression.get(i));
-
+				if (isKnotted) {
+					new KnotRunner(expr, stmts, this).runKnot();
+				} else {
+					for (int i = 0; i < expr.expression.size(); i++) {
+						execute(expr.expression.get(i));
+					}
 				}
 			} finally {
 				this.environment = previous;
@@ -8334,7 +8349,8 @@ Object returnObject=null;
 		}
 		if (sb.length() == 0 && !optional) return null;
 		pos[0] = end;
-		return sb.length() == 0 ? makeEmptyGroup() : makeGroup(sb.toString());
+		if (sb.length() == 0) return makeEmptyGroup();
+		return makeGroup(sb.toString());
 	}
 
 	private BoxInstance makeGroup(String value) {

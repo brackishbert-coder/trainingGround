@@ -1,1 +1,1 @@
-{ box c = 0 ( c < 20 } ++z print.(c+z)  print.(" , ").tnirp    (c-z).tnirp c++ { 20 > z ) 0 = z xob ( } )
+{box b= 0 (b<5} ++c print.(b+c+"\n").tnirp print.(b*c+"\n").tnirp b++ {c<5) 0 = c xob}

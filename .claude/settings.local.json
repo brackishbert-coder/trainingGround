@@ -1,0 +1,20 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(javac -cp src/main/java:/home/wes/.m2/repository/com/fasterxml/jackson/core/jackson-annotations/2.15.2/jackson-annotations-2.15.2.jar:/home/wes/.m2/repository/com/fasterxml/jackson/core/jackson-databind/2.15.2/jackson-databind-2.15.2.jar:/home/wes/.m2/repository/com/fasterxml/jackson/core/jackson-core/2.15.2/jackson-core-2.15.2.jar src/main/java/Box/Interpreter/KnotRunner.java src/main/java/Box/Interpreter/PocketInstance.java src/main/java/Box/Interpreter/TkpInstance.java)",
+      "Bash(java -cp /tmp/cpersistbuild:/tmp/interp_build:/home/wes/gitworkspace/trainingGround/target/classes:/home/wes/gitworkspace/trainingGround/resources/tess4j-3.4.8.jar:/home/wes/.m2/repository/com/fasterxml/jackson/core/jackson-annotations/2.15.2/jackson-annotations-2.15.2.jar:/home/wes/.m2/repository/com/fasterxml/jackson/core/jackson-databind/2.15.2/jackson-databind-2.15.2.jar:/home/wes/.m2/repository/com/fasterxml/jackson/core/jackson-core/2.15.2/jackson-core-2.15.2.jar Box.Interpreter.ContainerPersistenceTest)",
+      "Read(//tmp/interp_build/**)",
+      "Bash(java -cp \"/tmp/oscillbuild:/tmp/interp_build:target/classes:$\\(find ~/.m2/repository/com/fasterxml/jackson -name '*.jar')",
+      "Bash(sed '1d;$d')",
+      "Bash(node --check /tmp/pcb_script.js)",
+      "Bash(mvn test *)",
+      "Bash(mvn install *)",
+      "Bash(sed -n '4108,4120p' src/main/java/Parser/ParserTest.java)",
+      "Bash(sed -n '4290,4310p' src/main/java/Parser/ParserTest.java)",
+      "Bash(sed -n '4377,4400p' src/main/java/Parser/ParserTest.java)",
+      "Bash(python3 *)",
+      "Bash(java -cp __TRACKED_VAR__:__TRACKED_VAR__:/tmp/pcb_build:/tmp/pcb_test:__TRACKED_VAR__ Box.Interpreter.KnotRunnerOscillationTest)",
+      "Bash(git *)"
+    ]
+  }
+}
