@@ -1,1 +1,30 @@
+# ── Build output ─────────────────────────────────────────────
 /target/
+*.class
+
+# ── Eclipse ──────────────────────────────────────────────────
+.project
+.classpath
+.settings/
+.factorypath
+
+# ── IntelliJ IDEA ────────────────────────────────────────────
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# ── VS Code ──────────────────────────────────────────────────
+.vscode/
+
+# ── Interpreter scratch / output files (regenerated at runtime) ─
+/bin.box
+/gap.xob
+/non.cup
+/limbo.puc
+/void.tkp
+/trash.pkt
+
+# ── OS cruft ─────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
