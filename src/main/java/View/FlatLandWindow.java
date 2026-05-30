@@ -28,7 +28,6 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import FlatLandStructure.ViewableFlatLand;
-import testing.VariableRepository;
 
 public class FlatLandWindow extends JFrame {
 
@@ -391,30 +390,10 @@ public class FlatLandWindow extends JFrame {
 		HashMap<String, JComponent> componentSettingsMap = new HashMap<String, JComponent>();
 		random = new JButton();
 		toggle0 = false;
-		random.addActionListener(new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				VariableRepository.getInstance().setBut0(true);
-				toggle0 = true;
-				toggle1 = false;
-				System.out.println("Toggle0 " + toggle0);
-				System.out.println("Toggle1 " + toggle1);
-			}
-		});
+		
 		toggle1 = false;
 		random1 = new JButton();
-		random1.addActionListener(new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				VariableRepository.getInstance().setBut1(true);
-				toggle1 = true;
-				toggle0 = false;
-				System.out.println("Toggle0 " + toggle0);
-				System.out.println("Toggle1 " + toggle1);
-			}
-		});
+		
 		random2 = new JButton();
 		random3 = new JButton();
 		random4 = new JButton();
@@ -520,19 +499,7 @@ public class FlatLandWindow extends JFrame {
 
 					} else if (jComponent instanceof JTextField) {
 
-						((JTextField) jComponent).setText(value);
-						if (name.equals("jTextField")) {
-							VariableRepository.getInstance().setPoint1(Integer.valueOf(value));
-						} else if (name.equals("jTextField1")) {
-							VariableRepository.getInstance().setPoint2(Integer.valueOf(value));
-
-						} else if (name.equals("jTextField2")) {
-							VariableRepository.getInstance().setPoint3(Integer.valueOf(value));
-
-						} else if (name.equals("jTextField3")) {
-							VariableRepository.getInstance().setPoint4(Integer.valueOf(value));
-
-						}
+						
 					}
 
 				}
@@ -546,149 +513,21 @@ public class FlatLandWindow extends JFrame {
 			e.printStackTrace();
 		}
 		jTextField3.setVisible(true);
-		jTextField.addActionListener(new ActionListener() {
+		
 
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				VariableRepository.getInstance().setPoint1(Integer.valueOf(jTextField.getText()));
-				System.out.println(jTextField.getText());
+		
 
-			}
-		});
+		
 
-		jTextField1.addActionListener(new ActionListener() {
+		
 
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				VariableRepository.getInstance().setPoint2(Integer.valueOf(jTextField1.getText()));
-				System.out.println(jTextField1.getText());
+		
 
-			}
-		});
-
-		jTextField2.addActionListener(new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				VariableRepository.getInstance().setPoint3(Integer.valueOf(jTextField2.getText()));
-				System.out.println(jTextField2.getText());
-
-			}
-		});
-
-		jTextField3.addActionListener(new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				VariableRepository.getInstance().setPoint4(Integer.valueOf(jTextField3.getText()));
-				System.out.println(jTextField3.getText());
-
-			}
-		});
-
-		slide1.addChangeListener(new ChangeListener() {
-
-			@Override
-			public void stateChanged(ChangeEvent arg0) {
-				int value = slide1.getValue();
-				VariableRepository.getInstance().setThreshold1(value);
-				System.out.println("Thresh1: " + value);
-
-			}
-		});
-
-		slide2.addChangeListener(new ChangeListener() {
-
-			@Override
-			public void stateChanged(ChangeEvent arg0) {
-				int value = slide2.getValue();
-				VariableRepository.getInstance().setThreshold2(value);
-				System.out.println("Thresh2: " + value);
-
-			}
-		});
-		slide3.addChangeListener(new ChangeListener() {
-
-			@Override
-			public void stateChanged(ChangeEvent arg0) {
-				int value = slide3.getValue();
-				VariableRepository.getInstance().setMaxVal1(value);
-				System.out.println("maxVal1: " + value);
-
-			}
-		});
-
-		slide4.addChangeListener(new ChangeListener() {
-
-			@Override
-			public void stateChanged(ChangeEvent arg0) {
-				int value = slide4.getValue();
-				VariableRepository.getInstance().setMaxVal2(value);
-				;
-				System.out.println("maxVal2: " + value);
-
-			}
-		});
-		slide5.addChangeListener(new ChangeListener() {
-
-			@Override
-			public void stateChanged(ChangeEvent arg0) {
-				int value = slide5.getValue();
-				VariableRepository.getInstance().setKernal1x(value);
-				;
-				;
-				System.out.println("kernal1x: " + value);
-
-			}
-		});
-		slide6.addChangeListener(new ChangeListener() {
-
-			@Override
-			public void stateChanged(ChangeEvent arg0) {
-				int value = slide6.getValue();
-				VariableRepository.getInstance().setKernal1y(value);
-				;
-				System.out.println("kernal1y: " + value);
-
-			}
-		});
-		slide7.addChangeListener(new ChangeListener() {
-
-			@Override
-			public void stateChanged(ChangeEvent arg0) {
-				int value = slide7.getValue();
-				VariableRepository.getInstance().setKernal2x(value);
-				;
-				System.out.println("kernal2x: " + value);
-
-			}
-		});
-		slide8.addChangeListener(new ChangeListener() {
-
-			@Override
-			public void stateChanged(ChangeEvent arg0) {
-				int value = slide8.getValue();
-				VariableRepository.getInstance().setKernel2y(value);
-				System.out.println("kernal2y: " + value);
-
-			}
-		});
-
-		rollTheDice.addActionListener(new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-
-//				if (!GameDice.getInstance().nextTurn()) {
-//					System.out.println(GameDice.getInstance().roll());
-//					GameDice.getInstance().setNextTurn(true);
-//				} else {
-//					GameDice.getInstance().setNextTurn(false);
-//
-//				}
-
-			}
-		});
+		
+		
+		
+		
+		
 
 		getCurrentFlatLand().attach(new TimeObserver(getCurrentFlatLand(), txtrCurrentFlatlandTime));
 		attach(new FPSObserver(txtrFPS));

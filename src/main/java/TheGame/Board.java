@@ -9,7 +9,6 @@ import Math.*;
 import MonopolyActions.Actn;
 import MonopolyActions.Buy;
 import MonopolyActions.CCSquare;
-import MonopolyActions.Chance;
 import MonopolyActions.FreeParking;
 import MonopolyActions.GTJail;
 import MonopolyActions.GoAction;
@@ -74,13 +73,7 @@ public class Board {
 		}
 	}
 
-	public void addToPlayerChance(PlayerWrper p, Chance c) {
-		if (players.contains(p)) {
-			PlayerChance playerChance = chance.get(p);
-			playerChance.addChance(c);
-			chance.replace(p, playerChance);
-		}
-	}
+
 
 	public void addToTheDelinquencyOfTheYouth(PlayerWrper p, CommieChest c) {
 		if (players.contains(p)) {
@@ -147,7 +140,6 @@ public class Board {
 
 			if(!isBuyable(status)) {
 				if(status == Status.C0 || status == Status.C1 || status == Status.C2|| status == Status.C2UB) {
-					actionsToTakeThisRound.add(new Chance(player, status, freeSpaces, takenSpaces));
 				}else if(status == Status.CC0 || status == Status.CC1 || status == Status.CC2) {
 					actionsToTakeThisRound.add(new CCSquare(player, status, freeSpaces, takenSpaces));
 				}else if(status == Status.GOTOJAIL) {

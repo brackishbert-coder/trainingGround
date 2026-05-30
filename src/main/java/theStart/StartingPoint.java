@@ -2,6 +2,7 @@ package theStart;
 
 import java.awt.Color;
 import java.io.IOException;
+import java.util.ArrayList;
 
 import FlatLandStructure.ViewableFlatLand;
 import FlatLander.FlatLandFacebook;
@@ -12,6 +13,7 @@ import XMLLEVELLOADER.PlayerWrper;
 import XMLLEVELLOADER.XmlLevelLoader;
 import flatLand.trainingGround.EventHandler;
 import flatLand.trainingGround.FlatLandSelector;
+import flatLand.trainingGround.GAMSTATUS;
 import flatLand.trainingGround.GameStatus;
 import flatLand.trainingGround.Level;
 import flatLand.trainingGround.Sprites.SkeletonTwo;
@@ -39,7 +41,11 @@ public class StartingPoint {
 	private static WebcamUpdater webcamUpdater = new WebcamUpdater();
 
 	public static void main(String[] args) {
+		ArrayList<GAMSTATUS> list =new ArrayList<GAMSTATUS>();
+		list.add(GAMSTATUS.BRAIN);
+		list.add(GAMSTATUS.DEBUG);
 		
+		GameStatus.getInstance().setStatus(list);
 		Thread thread = new Thread(webcamUpdater);
 		thread.start();
 		events = new EventHandler();

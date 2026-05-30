@@ -18,8 +18,7 @@ import theStart.thePeople.FlatlanderType;
 import theStart.theSpace.FlatLandWindow;
 import theStart.theStuff.FlatLanderRandom;
 import theStart.theStuff.ClassOfFlatLander;
-import vec.VectorServer;
-import vectorization.vector;
+
 public class TheStartCamera implements CameraContract {
 
 	private int width;
@@ -42,7 +41,6 @@ public class TheStartCamera implements CameraContract {
 
 	private ArrayList<NuronForDisplay> nuronList = new ArrayList<NuronForDisplay>();
 	private long timerCount = 0;
-	private VectorServer vectorServer;
 
 	public TheStartCamera(int width, int height, int posxinflatland, int posyinflatland, ViewableFlatLand flatLand2,
 			int seed, int nroncount, Canvas canvas) {
@@ -61,9 +59,7 @@ public class TheStartCamera implements CameraContract {
 			bufferStrategy = canvas.getBufferStrategy();
 		}
 		
-		vectorServer = new VectorServer();
-		Thread thread = new Thread(vectorServer);
-		thread.start();
+		
 		
 		
 	}
@@ -150,12 +146,7 @@ public class TheStartCamera implements CameraContract {
 				}
 			}
 
-			if (System.currentTimeMillis() - timerCount >= 250) {
-				vector vector = new vector( outputVector);
-				vectorServer.addVector(vector);
-				timerCount = System.currentTimeMillis();
-
-			}
+			
 
 		}
 

@@ -189,7 +189,6 @@ public class TerminalSprite extends LOG implements Sprites {
 					terminalBuffer[i] = null;
 				}
 				terminalBufferIndex = 0;
-				System.err.println("BUFFER PURGE");
 			}
 
 			Graphics2D g = TerminalDisplayImg.createGraphics();
@@ -224,7 +223,6 @@ public class TerminalSprite extends LOG implements Sprites {
 					terminalBuffer[i] = null;
 				}
 				terminalBufferIndex = 0;
-				System.err.println("BUFFER PURGE");
 			}
 
 			if (terminalXCharPosition >= terminalCharWidth) {

@@ -14,7 +14,7 @@ jCheckBox4: 1
 jCheckBox5: 1
 jCheckBox6: 0
 jCheckBox7: 0
-jTextField: 960
-jTextField1: 875
-jTextField2: 385
-jTextField3: 230
+jTextField: 
+jTextField1: 
+jTextField2: 
+jTextField3: 
